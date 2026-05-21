@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-    <!-- PWA Meta Tags - ADD THESE -->
-    <meta name="description" content="Play Make 10 and Sudoku puzzle games offline">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gry Liczbowe - Make 10 & Sudoku</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Graj w Make 10 i Sudoku offline">
     <meta name="theme-color" content="#667eea">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Number Games">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Number Games - Make 10 & Sudoku</title>
+    <meta name="apple-mobile-web-app-title" content="Gry Liczbowe">
+    
     <style>
         * {
             margin: 0;
@@ -38,6 +39,39 @@
             max-width: 600px;
             width: 100%;
             text-align: center;
+        }
+
+        .language-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 25px;
+            padding: 8px 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #667eea;
+            font-size: 0.9em;
+        }
+
+        .lang-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
         }
 
         h1 {
@@ -99,45 +133,132 @@
             padding-top: 20px;
             border-top: 1px solid #e0e0e0;
         }
+
+        #installBtn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #4ade80;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        #installBtn:hover {
+            background: #22c55e;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            .language-toggle {
+                position: static;
+                margin-bottom: 20px;
+                justify-content: center;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="language-toggle">
+        <button class="lang-btn active" onclick="setLanguage('pl')">🇵🇱 Polski</button>
+        <button class="lang-btn" onclick="setLanguage('en')">🇬🇧 English</button>
+    </div>
+
     <div class="container">
-        <h1>🎮 Number Games</h1>
-        <p class="subtitle">Choose a game to play</p>
+        <h1 id="main-title">🎮 Gry Liczbowe</h1>
+        <p class="subtitle" id="subtitle">Wybierz grę</p>
         
         <div class="games-grid">
             <a href="make10.html" class="game-card">
                 <div class="game-icon">🎯</div>
-                <div class="game-title">Make 10</div>
-                <div class="game-description">Match numbers that sum to 10 or form pairs</div>
+                <div class="game-title" id="game1-title">Make 10</div>
+                <div class="game-description" id="game1-desc">Dopasuj liczby, które sumują się do 10 lub tworzą pary</div>
             </a>
             
             <a href="sudoku.html" class="game-card">
                 <div class="game-icon">🧩</div>
-                <div class="game-title">Sudoku</div>
-                <div class="game-description">Classic number puzzle with multiple difficulty levels</div>
+                <div class="game-title" id="game2-title">Sudoku</div>
+                <div class="game-description" id="game2-desc">Klasyczna łamigłówka liczbowa z różnymi poziomami trudności</div>
             </a>
         </div>
         
         <div class="footer">
-            Made with ❤️ | Free to play
+            <span id="footer-text">Stworzone z ❤️ | Graj za darmo</span>
             <br>
-            <button id="installBtn" style="
-                margin-top: 15px;
-                padding: 10px 20px;
-                background: #4ade80;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: bold;
-                display: none;
-            " onclick="installApp()">📱 Install App</button>
+            <button id="installBtn" onclick="installApp()">📱 <span id="install-text">Zainstaluj aplikację</span></button>
+        </div>
     </div>
 
-    <!-- PWA Installation Script - ADD THIS -->
     <script>
+        const translations = {
+            pl: {
+                mainTitle: '🎮 Gry Liczbowe',
+                subtitle: 'Wybierz grę',
+                game1Title: 'Make 10',
+                game1Desc: 'Dopasuj liczby, które sumują się do 10 lub tworzą pary',
+                game2Title: 'Sudoku',
+                game2Desc: 'Klasyczna łamigłówka liczbowa z różnymi poziomami trudności',
+                footerText: 'Stworzone z ❤️ | Graj za darmo',
+                installText: 'Zainstaluj aplikację'
+            },
+            en: {
+                mainTitle: '🎮 Number Games',
+                subtitle: 'Choose a game to play',
+                game1Title: 'Make 10',
+                game1Desc: 'Match numbers that sum to 10 or form pairs',
+                game2Title: 'Sudoku',
+                game2Desc: 'Classic number puzzle with multiple difficulty levels',
+                footerText: 'Made with ❤️ | Free to play',
+                installText: 'Install App'
+            }
+        };
+
+        function setLanguage(lang) {
+            localStorage.setItem('language', lang);
+            
+            // Update button states
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update text
+            const t = translations[lang];
+            document.getElementById('main-title').textContent = t.mainTitle;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('game1-title').textContent = t.game1Title;
+            document.getElementById('game1-desc').textContent = t.game1Desc;
+            document.getElementById('game2-title').textContent = t.game2Title;
+            document.getElementById('game2-desc').textContent = t.game2Desc;
+            document.getElementById('footer-text').textContent = t.footerText;
+            document.getElementById('install-text').textContent = t.installText;
+            
+            document.documentElement.lang = lang;
+        }
+
+        // Load saved language or default to Polish
+        window.addEventListener('load', () => {
+            const savedLang = localStorage.getItem('language') || 'pl';
+            const langButtons = document.querySelectorAll('.lang-btn');
+            langButtons.forEach(btn => {
+                if (btn.textContent.includes(savedLang === 'pl' ? 'Polski' : 'English')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            if (savedLang === 'en') {
+                setLanguage('en');
+            }
+        });
+
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -158,7 +279,6 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Show install button
             if (installBtn) {
                 installBtn.style.display = 'inline-block';
             }
@@ -179,7 +299,6 @@
             }
         }
 
-        // Hide button if already installed
         window.addEventListener('appinstalled', () => {
             if (installBtn) {
                 installBtn.style.display = 'none';

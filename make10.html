@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Make 10 - Number Matching Game</title>
+    <title>Make 10 - Gra dopasowywania liczb</title>
     
-    <!-- PWA Meta Tags - ADD THESE -->
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#667eea">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -36,11 +36,50 @@
             width: 100%;
         }
 
+        .language-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #667eea;
+            font-size: 0.8em;
+        }
+
+        .lang-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
         h1 {
             text-align: center;
             color: #667eea;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             font-size: 2em;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
         }
 
         .stats {
@@ -185,15 +224,6 @@
             color: #1e40af;
         }
 
-        .game-over {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
         .instructions {
             background: #f9fafb;
             padding: 15px;
@@ -219,34 +249,38 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>🎯 Make 10</h1>
+        <div class="language-toggle">
+            <button class="lang-btn active" onclick="setLanguage('pl')">🇵🇱 PL</button>
+            <button class="lang-btn" onclick="setLanguage('en')">🇬🇧 EN</button>
+        </div>
 
-        <!-- Add this right after <h1>🎯 Make 10</h1> -->
-        <div style="text-align: center; margin-bottom: 15px;">
-            <a href="index.html" style="color: #667eea; text-decoration: none; font-size: 0.9em;">← Back to Games</a>
+        <h1>🎯 Make 10</h1>
+        
+        <div class="back-link">
+            <a href="index.html" id="back-link">← Powrót do gier</a>
         </div>
         
         <div class="instructions">
-            <h3>How to Play:</h3>
-            <ul>
-                <li>Click two adjacent numbers that sum to 10</li>
-                <li>Or click two identical numbers (pair)</li>
-                <li>Numbers must be horizontally or vertically adjacent</li>
-                <li>Clear all numbers to win!</li>
+            <h3 id="how-to-play">Jak grać:</h3>
+            <ul id="instructions-list">
+                <li>Kliknij dwie sąsiednie liczby, które sumują się do 10</li>
+                <li>Lub kliknij dwie identyczne liczby (para)</li>
+                <li>Liczby muszą być obok siebie poziomo lub pionowo</li>
+                <li>Wyczyść wszystkie liczby, aby wygrać!</li>
             </ul>
         </div>
 
         <div class="stats">
             <div class="stat">
-                <div class="stat-label">Score</div>
+                <div class="stat-label" id="score-label">Wynik</div>
                 <div class="stat-value" id="score">0</div>
             </div>
             <div class="stat">
-                <div class="stat-label">Moves</div>
+                <div class="stat-label" id="moves-label">Ruchy</div>
                 <div class="stat-value" id="moves">0</div>
             </div>
             <div class="stat">
-                <div class="stat-label">Rows Left</div>
+                <div class="stat-label" id="rows-label">Pozostało rzędów</div>
                 <div class="stat-value" id="rows-left">3</div>
             </div>
         </div>
@@ -256,12 +290,78 @@
         <div class="grid" id="grid"></div>
 
         <div class="buttons">
-            <button class="new-game-btn" onclick="newGame()">New Game</button>
-            <button class="add-row-btn" id="add-row-btn" onclick="addRow()">Add Row (3 left)</button>
+            <button class="new-game-btn" onclick="newGame()" id="new-game-btn">Nowa gra</button>
+            <button class="add-row-btn" id="add-row-btn" onclick="addRow()">Dodaj rząd (3 pozostało)</button>
         </div>
     </div>
 
     <script>
+        const translations = {
+            pl: {
+                backLink: '← Powrót do gier',
+                howToPlay: 'Jak grać:',
+                instructions: [
+                    'Kliknij dwie sąsiednie liczby, które sumują się do 10',
+                    'Lub kliknij dwie identyczne liczby (para)',
+                    'Liczby muszą być obok siebie poziomo lub pionowo',
+                    'Wyczyść wszystkie liczby, aby wygrać!'
+                ],
+                scoreLabel: 'Wynik',
+                movesLabel: 'Ruchy',
+                rowsLabel: 'Pozostało rzędów',
+                newGameBtn: 'Nowa gra',
+                addRowBtn: 'Dodaj rząd',
+                left: 'pozostało',
+                msgMatch: 'Dopasuj liczby, które sumują się do 10!',
+                msgSelect: 'Wybierz sąsiednią komórkę',
+                msgCleared: 'Wybór wyczyszczony',
+                msgAdjacent: 'Komórki muszą być obok siebie!',
+                msgPair: 'Para dopasowana! +',
+                msgPerfect10: 'Perfekcyjna 10! +',
+                msgIncorrect: 'Need 10 lub pary!',
+                msgWin: '🎉 Wygrałeś! Wynik:',
+                msgWinMoves: 'w',
+                msgWinMovesText: 'ruchach!',
+                confirmWin: 'Gratulacje! Zdobyłeś',
+                confirmWinPts: 'punktów w',
+                confirmWinMoves: 'ruchach!\n\nGrać ponownie?',
+                rowAdded: 'Rząd dodany!',
+                rowsRemaining: 'rzędów pozostało'
+            },
+            en: {
+                backLink: '← Back to Games',
+                howToPlay: 'How to Play:',
+                instructions: [
+                    'Click two adjacent numbers that sum to 10',
+                    'Or click two identical numbers (pair)',
+                    'Numbers must be horizontally or vertically adjacent',
+                    'Clear all numbers to win!'
+                ],
+                scoreLabel: 'Score',
+                movesLabel: 'Moves',
+                rowsLabel: 'Rows Left',
+                newGameBtn: 'New Game',
+                addRowBtn: 'Add Row',
+                left: 'left',
+                msgMatch: 'Match numbers that sum to 10!',
+                msgSelect: 'Select an adjacent cell',
+                msgCleared: 'Selection cleared',
+                msgAdjacent: 'Cells must be adjacent!',
+                msgPair: 'Pair matched! +',
+                msgPerfect10: 'Perfect 10! +',
+                msgIncorrect: 'Need 10 or matching pairs!',
+                msgWin: '🎉 You Win! Score:',
+                msgWinMoves: 'in',
+                msgWinMovesText: 'moves!',
+                confirmWin: 'Congratulations! You scored',
+                confirmWinPts: 'points in',
+                confirmWinMoves: 'moves!\n\nPlay again?',
+                rowAdded: 'Row added!',
+                rowsRemaining: 'rows remaining'
+            }
+        };
+
+        let currentLang = 'pl';
         let grid = [];
         let selectedCell = null;
         let score = 0;
@@ -270,6 +370,35 @@
         const COLS = 5;
         const INITIAL_ROWS = 4;
 
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLang];
+            document.getElementById('back-link').textContent = t.backLink;
+            document.getElementById('how-to-play').textContent = t.howToPlay;
+            
+            const instructionsList = document.getElementById('instructions-list');
+            instructionsList.innerHTML = t.instructions.map(i => `<li>${i}</li>`).join('');
+            
+            document.getElementById('score-label').textContent = t.scoreLabel;
+            document.getElementById('moves-label').textContent = t.movesLabel;
+            document.getElementById('rows-label').textContent = t.rowsLabel;
+            document.getElementById('new-game-btn').textContent = t.newGameBtn;
+            document.getElementById('add-row-btn').textContent = `${t.addRowBtn} (${rowsLeft} ${t.left})`;
+            
+            document.documentElement.lang = lang;
+        }
+
         function initGame() {
             grid = [];
             selectedCell = null;
@@ -277,19 +406,18 @@
             moves = 0;
             rowsLeft = 3;
             
-            // Create initial grid
             for (let i = 0; i < INITIAL_ROWS; i++) {
                 addNewRow();
             }
             
             updateDisplay();
-            showMessage('Match numbers that sum to 10!', 'info');
+            showMessage(translations[currentLang].msgMatch, 'info');
         }
 
         function addNewRow() {
             const row = [];
             for (let i = 0; i < COLS; i++) {
-                row.push(Math.floor(Math.random() * 9) + 1); // Numbers 1-9
+                row.push(Math.floor(Math.random() * 9) + 1);
             }
             grid.push(row);
         }
@@ -299,15 +427,14 @@
                 addNewRow();
                 rowsLeft--;
                 updateDisplay();
-                showMessage(`Row added! ${rowsLeft} rows remaining`, 'info');
+                const t = translations[currentLang];
+                showMessage(`${t.rowAdded} ${rowsLeft} ${t.rowsRemaining}`, 'info');
             }
         }
 
         function renderGrid() {
             const gridElement = document.getElementById('grid');
             gridElement.innerHTML = '';
-            
-            // Adjust grid columns dynamically
             gridElement.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
             
             for (let row = 0; row < grid.length; row++) {
@@ -337,13 +464,12 @@
             if (!selectedCell) {
                 selectedCell = { row, col, value: grid[row][col] };
                 renderGrid();
-                showMessage('Select an adjacent cell', 'info');
+                showMessage(translations[currentLang].msgSelect, 'info');
             } else {
                 if (selectedCell.row === row && selectedCell.col === col) {
-                    // Deselect
                     selectedCell = null;
                     renderGrid();
-                    showMessage('Selection cleared', 'info');
+                    showMessage(translations[currentLang].msgCleared, 'info');
                 } else {
                     tryMatch(selectedCell, { row, col, value: grid[row][col] });
                 }
@@ -353,14 +479,14 @@
         function areAdjacent(cell1, cell2) {
             const rowDiff = Math.abs(cell1.row - cell2.row);
             const colDiff = Math.abs(cell1.col - cell2.col);
-            
-            // Check if horizontally or vertically adjacent
             return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
         }
 
         function tryMatch(cell1, cell2) {
+            const t = translations[currentLang];
+            
             if (!areAdjacent(cell1, cell2)) {
-                showMessage('Cells must be adjacent!', 'error');
+                showMessage(t.msgAdjacent, 'error');
                 selectedCell = null;
                 renderGrid();
                 return;
@@ -370,11 +496,9 @@
             const isPair = cell1.value === cell2.value;
 
             if (sum === 10 || isPair) {
-                // Valid match!
                 moves++;
                 score += sum;
                 
-                // Mark cells as matched with animation
                 const cells = document.querySelectorAll('.cell');
                 const index1 = cell1.row * COLS + cell1.col;
                 const index2 = cell2.row * COLS + cell2.col;
@@ -391,16 +515,15 @@
                     checkWin();
                 }, 500);
                 
-                showMessage(isPair ? `Pair matched! +${sum}` : `Perfect 10! +${sum}`, 'success');
+                showMessage(isPair ? `${t.msgPair}${sum}` : `${t.msgPerfect10}${sum}`, 'success');
             } else {
-                showMessage(`${cell1.value} + ${cell2.value} = ${sum}. Need 10 or matching pairs!`, 'error');
+                showMessage(`${cell1.value} + ${cell2.value} = ${sum}. ${t.msgIncorrect}`, 'error');
                 selectedCell = null;
                 renderGrid();
             }
         }
 
         function compactGrid() {
-            // Remove empty columns and compact grid
             for (let row = 0; row < grid.length; row++) {
                 grid[row] = grid[row].filter(cell => cell !== 0);
                 while (grid[row].length < COLS) {
@@ -413,9 +536,10 @@
             const hasNumbers = grid.some(row => row.some(cell => cell !== 0));
             
             if (!hasNumbers) {
-                showMessage(`🎉 You Win! Score: ${score} in ${moves} moves!`, 'success');
+                const t = translations[currentLang];
+                showMessage(`${t.msgWin} ${score} ${t.msgWinMoves} ${moves} ${t.msgWinMovesText}`, 'success');
                 setTimeout(() => {
-                    if (confirm(`Congratulations! You scored ${score} points in ${moves} moves!\n\nPlay again?`)) {
+                    if (confirm(`${t.confirmWin} ${score} ${t.confirmWinPts} ${moves} ${t.confirmWinMoves}`)) {
                         newGame();
                     }
                 }, 500);
@@ -427,8 +551,9 @@
             document.getElementById('moves').textContent = moves;
             document.getElementById('rows-left').textContent = rowsLeft;
             
+            const t = translations[currentLang];
             const addRowBtn = document.getElementById('add-row-btn');
-            addRowBtn.textContent = `Add Row (${rowsLeft} left)`;
+            addRowBtn.textContent = `${t.addRowBtn} (${rowsLeft} ${t.left})`;
             addRowBtn.disabled = rowsLeft === 0;
             
             renderGrid();
@@ -444,8 +569,21 @@
             initGame();
         }
 
-        // Start the game
-        initGame();
+        // Load saved language
+        window.addEventListener('load', () => {
+            const savedLang = localStorage.getItem('language') || 'pl';
+            currentLang = savedLang;
+            const langButtons = document.querySelectorAll('.lang-btn');
+            langButtons.forEach(btn => {
+                if (btn.textContent.includes(savedLang === 'pl' ? 'PL' : 'EN')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            updateLanguage();
+            initGame();
+        });
     </script>
 </body>
 </html>

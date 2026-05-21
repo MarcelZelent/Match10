@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sudoku - Number Puzzle Game</title>
+    <title>Sudoku - Gra logiczna</title>
     
-    <!-- PWA Meta Tags - ADD THESE -->
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#667eea">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -34,6 +34,34 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-width: 600px;
             width: 100%;
+        }
+
+        .language-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #667eea;
+            font-size: 0.8em;
+        }
+
+        .lang-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
         }
 
         h1 {
@@ -300,30 +328,35 @@
 </head>
 <body>
     <div class="game-container">
+        <div class="language-toggle">
+            <button class="lang-btn active" onclick="setLanguage('pl')">🇵🇱 PL</button>
+            <button class="lang-btn" onclick="setLanguage('en')">🇬🇧 EN</button>
+        </div>
+
         <h1>🧩 Sudoku</h1>
         
         <div class="back-link">
-            <a href="index.html">← Back to Games</a>
+            <a href="index.html" id="back-link">← Powrót do gier</a>
         </div>
 
         <div class="difficulty-selector">
-            <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy</button>
-            <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium</button>
-            <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard</button>
-            <button class="difficulty-btn" onclick="setDifficulty('expert')">Expert</button>
+            <button class="difficulty-btn active" onclick="setDifficulty('easy')" id="diff-easy">Łatwy</button>
+            <button class="difficulty-btn" onclick="setDifficulty('medium')" id="diff-medium">Średni</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')" id="diff-hard">Trudny</button>
+            <button class="difficulty-btn" onclick="setDifficulty('expert')" id="diff-expert">Ekspert</button>
         </div>
 
         <div class="stats">
             <div class="stat">
-                <div class="stat-label">Difficulty</div>
-                <div class="stat-value" id="difficulty">Easy</div>
+                <div class="stat-label" id="diff-label">Poziom</div>
+                <div class="stat-value" id="difficulty">Łatwy</div>
             </div>
             <div class="stat">
-                <div class="stat-label">Time</div>
+                <div class="stat-label" id="time-label">Czas</div>
                 <div class="stat-value" id="timer">00:00</div>
             </div>
             <div class="stat">
-                <div class="stat-label">Mistakes</div>
+                <div class="stat-label" id="mistakes-label">Błędy</div>
                 <div class="stat-value" id="mistakes">0</div>
             </div>
         </div>
@@ -342,18 +375,88 @@
             <button class="number-btn" onclick="inputNumber(7)">7</button>
             <button class="number-btn" onclick="inputNumber(8)">8</button>
             <button class="number-btn" onclick="inputNumber(9)">9</button>
-            <button class="number-btn" onclick="inputNumber(0)">Clear</button>
+            <button class="number-btn" onclick="inputNumber(0)" id="clear-num-btn">Wyczyść</button>
         </div>
 
         <div class="buttons">
-            <button class="new-game-btn" onclick="newGame()">New Game</button>
-            <button class="check-btn" onclick="checkSolution()">Check</button>
-            <button class="hint-btn" onclick="getHint()">Hint</button>
-            <button class="clear-btn" onclick="clearBoard()">Clear All</button>
+            <button class="new-game-btn" onclick="newGame()" id="new-game-btn">Nowa gra</button>
+            <button class="check-btn" onclick="checkSolution()" id="check-btn">Sprawdź</button>
+            <button class="hint-btn" onclick="getHint()" id="hint-btn">Podpowiedź</button>
+            <button class="clear-btn" onclick="clearBoard()" id="clear-board-btn">Wyczyść wszystko</button>
         </div>
     </div>
 
     <script>
+        const translations = {
+            pl: {
+                backLink: '← Powrót do gier',
+                diffEasy: 'Łatwy',
+                diffMedium: 'Średni',
+                diffHard: 'Trudny',
+                diffExpert: 'Ekspert',
+                diffLabel: 'Poziom',
+                timeLabel: 'Czas',
+                mistakesLabel: 'Błędy',
+                clearNumBtn: 'Wyczyść',
+                newGameBtn: 'Nowa gra',
+                checkBtn: 'Sprawdź',
+                hintBtn: 'Podpowiedź',
+                clearBoardBtn: 'Wyczyść wszystko',
+                msgGoodLuck: 'Powodzenia! Wypełnij wszystkie puste komórki.',
+                msgSelectCell: 'Najpierw wybierz komórkę',
+                msgCellCorrect: 'Ta komórka jest już poprawna!',
+                msgHint: 'Podpowiedź: Odpowiedź to',
+                msgIncorrect: 'Niepoprawnie! Spróbuj ponownie.',
+                msgCorrect: 'Poprawnie! ✓',
+                msgNotComplete: 'Puzzle nie jest jeszcze ukończone!',
+                msgPerfect: '🎉 Perfekcyjnie! Rozwiązałeś!',
+                msgSomeIncorrect: 'Niektóre komórki są niepoprawne. Próbuj dalej!',
+                msgBoardCleared: 'Plansza wyczyszczona!',
+                confirmClear: 'Czy na pewno chcesz wyczyścić wszystkie wpisy?',
+                msgWin: '🎉 Gratulacje! Wygrałeś w',
+                msgWinWith: 'z',
+                msgWinMistakes: 'błędami!',
+                msgWinComplete: 'Niesamowite! Ukończyłeś',
+                msgWinPuzzle: 'puzzle!\nCzas:',
+                msgWinErrors: '\nBłędy:',
+                msgWinPlayAgain: '\n\nGrać ponownie?'
+            },
+            en: {
+                backLink: '← Back to Games',
+                diffEasy: 'Easy',
+                diffMedium: 'Medium',
+                diffHard: 'Hard',
+                diffExpert: 'Expert',
+                diffLabel: 'Difficulty',
+                timeLabel: 'Time',
+                mistakesLabel: 'Mistakes',
+                clearNumBtn: 'Clear',
+                newGameBtn: 'New Game',
+                checkBtn: 'Check',
+                hintBtn: 'Hint',
+                clearBoardBtn: 'Clear All',
+                msgGoodLuck: 'Good luck! Fill in all the empty cells.',
+                msgSelectCell: 'Please select a cell first',
+                msgCellCorrect: 'This cell is already correct!',
+                msgHint: 'Hint: The answer is',
+                msgIncorrect: 'Incorrect! Try again.',
+                msgCorrect: 'Correct! ✓',
+                msgNotComplete: 'Puzzle is not complete yet!',
+                msgPerfect: '🎉 Perfect! You solved it!',
+                msgSomeIncorrect: 'Some cells are incorrect. Keep trying!',
+                msgBoardCleared: 'Board cleared!',
+                confirmClear: 'Are you sure you want to clear all your entries?',
+                msgWin: '🎉 Congratulations! You won in',
+                msgWinWith: 'with',
+                msgWinMistakes: 'mistakes!',
+                msgWinComplete: 'Amazing! You completed the',
+                msgWinPuzzle: 'puzzle!\nTime:',
+                msgWinErrors: '\nMistakes:',
+                msgWinPlayAgain: '\n\nPlay again?'
+            }
+        };
+
+        let currentLang = 'pl';
         let board = [];
         let solution = [];
         let selectedCell = null;
@@ -369,6 +472,46 @@
             expert: 70
         };
 
+        const DIFFICULTY_NAMES = {
+            easy: { pl: 'Łatwy', en: 'Easy' },
+            medium: { pl: 'Średni', en: 'Medium' },
+            hard: { pl: 'Trudny', en: 'Hard' },
+            expert: { pl: 'Ekspert', en: 'Expert' }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLang];
+            document.getElementById('back-link').textContent = t.backLink;
+            document.getElementById('diff-easy').textContent = t.diffEasy;
+            document.getElementById('diff-medium').textContent = t.diffMedium;
+            document.getElementById('diff-hard').textContent = t.diffHard;
+            document.getElementById('diff-expert').textContent = t.diffExpert;
+            document.getElementById('diff-label').textContent = t.diffLabel;
+            document.getElementById('time-label').textContent = t.timeLabel;
+            document.getElementById('mistakes-label').textContent = t.mistakesLabel;
+            document.getElementById('clear-num-btn').textContent = t.clearNumBtn;
+            document.getElementById('new-game-btn').textContent = t.newGameBtn;
+            document.getElementById('check-btn').textContent = t.checkBtn;
+            document.getElementById('hint-btn').textContent = t.hintBtn;
+            document.getElementById('clear-board-btn').textContent = t.clearBoardBtn;
+            
+            document.getElementById('difficulty').textContent = DIFFICULTY_NAMES[difficulty][currentLang];
+            
+            document.documentElement.lang = lang;
+        }
+
         function setDifficulty(level) {
             difficulty = level;
             document.querySelectorAll('.difficulty-btn').forEach(btn => {
@@ -379,11 +522,8 @@
         }
 
         function newGame() {
-            // Generate a complete solved Sudoku board
             solution = generateSolvedBoard();
             board = JSON.parse(JSON.stringify(solution));
-            
-            // Remove numbers based on difficulty
             removeNumbers(DIFFICULTIES[difficulty]);
             
             mistakes = 0;
@@ -395,7 +535,7 @@
             
             renderBoard();
             updateStats();
-            showMessage('Good luck! Fill in all the empty cells.', 'info');
+            showMessage(translations[currentLang].msgGoodLuck, 'info');
         }
 
         function generateSolvedBoard() {
@@ -414,13 +554,10 @@
             for (let num of numbers) {
                 if (isValid(board, row, col, num)) {
                     board[row][col] = num;
-                    
                     if (solveSudoku(board)) return true;
-                    
                     board[row][col] = 0;
                 }
             }
-            
             return false;
         }
 
@@ -434,17 +571,12 @@
         }
 
         function isValid(board, row, col, num) {
-            // Check row
             for (let i = 0; i < 9; i++) {
                 if (board[row][i] === num) return false;
             }
-            
-            // Check column
             for (let i = 0; i < 9; i++) {
                 if (board[i][col] === num) return false;
             }
-            
-            // Check 3x3 box
             const boxRow = Math.floor(row / 3) * 3;
             const boxCol = Math.floor(col / 3) * 3;
             for (let i = 0; i < 3; i++) {
@@ -452,7 +584,6 @@
                     if (board[boxRow + i][boxCol + j] === num) return false;
                 }
             }
-            
             return true;
         }
 
@@ -461,7 +592,6 @@
             while (removed < count) {
                 const row = Math.floor(Math.random() * 9);
                 const col = Math.floor(Math.random() * 9);
-                
                 if (board[row][col] !== 0) {
                     board[row][col] = 0;
                     removed++;
@@ -496,15 +626,13 @@
                     grid.appendChild(cell);
                 }
             }
-            
             highlightCells();
         }
 
         function selectCell(row, col) {
             if (solution[row][col] === board[row][col] && board[row][col] !== 0) {
-                return; // Can't select fixed cells
+                return;
             }
-            
             selectedCell = { row, col };
             highlightCells();
         }
@@ -530,7 +658,6 @@
                     cell.classList.add('same-number');
                 }
                 
-                // Highlight errors
                 if (board[cellRow][cellCol] !== 0 && 
                     board[cellRow][cellCol] !== solution[cellRow][cellCol]) {
                     cell.classList.add('error');
@@ -539,15 +666,17 @@
         }
 
         function inputNumber(num) {
+            const t = translations[currentLang];
+            
             if (!selectedCell) {
-                showMessage('Please select a cell first', 'info');
+                showMessage(t.msgSelectCell, 'info');
                 return;
             }
             
             const { row, col } = selectedCell;
             
             if (solution[row][col] === board[row][col] && board[row][col] !== 0) {
-                return; // Can't modify fixed cells
+                return;
             }
             
             if (num === 0) {
@@ -557,9 +686,9 @@
                 
                 if (num !== solution[row][col]) {
                     mistakes++;
-                    showMessage('Incorrect! Try again.', 'error');
+                    showMessage(t.msgIncorrect, 'error');
                 } else {
-                    showMessage('Correct! ✓', 'success');
+                    showMessage(t.msgCorrect, 'success');
                 }
             }
             
@@ -582,18 +711,16 @@
 
         function navigateCell(key) {
             if (!selectedCell) return;
-            
             let { row, col } = selectedCell;
-            
             if (key === 'ArrowUp' && row > 0) row--;
             if (key === 'ArrowDown' && row < 8) row++;
             if (key === 'ArrowLeft' && col > 0) col--;
             if (key === 'ArrowRight' && col < 8) col++;
-            
             selectCell(row, col);
         }
 
         function checkSolution() {
+            const t = translations[currentLang];
             let correct = true;
             let filled = true;
             
@@ -608,38 +735,41 @@
             }
             
             if (!filled) {
-                showMessage('Puzzle is not complete yet!', 'info');
+                showMessage(t.msgNotComplete, 'info');
             } else if (correct) {
-                showMessage('🎉 Perfect! You solved it!', 'success');
+                showMessage(t.msgPerfect, 'success');
                 clearInterval(timerInterval);
             } else {
-                showMessage('Some cells are incorrect. Keep trying!', 'error');
+                showMessage(t.msgSomeIncorrect, 'error');
             }
             
             renderBoard();
         }
 
         function getHint() {
+            const t = translations[currentLang];
+            
             if (!selectedCell) {
-                showMessage('Please select a cell first', 'info');
+                showMessage(t.msgSelectCell, 'info');
                 return;
             }
             
             const { row, col } = selectedCell;
             
             if (solution[row][col] === board[row][col] && board[row][col] !== 0) {
-                showMessage('This cell is already correct!', 'info');
+                showMessage(t.msgCellCorrect, 'info');
                 return;
             }
             
             board[row][col] = solution[row][col];
-            showMessage(`Hint: The answer is ${solution[row][col]}`, 'success');
+            showMessage(`${t.msgHint} ${solution[row][col]}`, 'success');
             renderBoard();
             checkWin();
         }
 
         function clearBoard() {
-            if (confirm('Are you sure you want to clear all your entries?')) {
+            const t = translations[currentLang];
+            if (confirm(t.confirmClear)) {
                 for (let i = 0; i < 9; i++) {
                     for (let j = 0; j < 9; j++) {
                         if (board[i][j] !== solution[i][j] || board[i][j] === 0) {
@@ -648,7 +778,7 @@
                     }
                 }
                 renderBoard();
-                showMessage('Board cleared!', 'info');
+                showMessage(t.msgBoardCleared, 'info');
             }
         }
 
@@ -661,9 +791,11 @@
             
             clearInterval(timerInterval);
             const time = formatTime(Math.floor((Date.now() - startTime) / 1000));
+            const t = translations[currentLang];
+            
             setTimeout(() => {
-                showMessage(`🎉 Congratulations! You won in ${time} with ${mistakes} mistakes!`, 'success');
-                if (confirm(`Amazing! You completed the ${difficulty} puzzle!\nTime: ${time}\nMistakes: ${mistakes}\n\nPlay again?`)) {
+                showMessage(`${t.msgWin} ${time} ${t.msgWinWith} ${mistakes} ${t.msgWinMistakes}`, 'success');
+                if (confirm(`${t.msgWinComplete} ${DIFFICULTY_NAMES[difficulty][currentLang]} ${t.msgWinPuzzle} ${time}${t.msgWinErrors} ${mistakes}${t.msgWinPlayAgain}`)) {
                     newGame();
                 }
             }, 500);
@@ -681,7 +813,7 @@
         }
 
         function updateStats() {
-            document.getElementById('difficulty').textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+            document.getElementById('difficulty').textContent = DIFFICULTY_NAMES[difficulty][currentLang];
             document.getElementById('mistakes').textContent = mistakes;
         }
 
@@ -691,8 +823,21 @@
             messageEl.className = 'message ' + type;
         }
 
-        // Start the game
-        newGame();
+        // Load saved language
+        window.addEventListener('load', () => {
+            const savedLang = localStorage.getItem('language') || 'pl';
+            currentLang = savedLang;
+            const langButtons = document.querySelectorAll('.lang-btn');
+            langButtons.forEach(btn => {
+                if (btn.textContent.includes(savedLang === 'pl' ? 'PL' : 'EN')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            updateLanguage();
+            newGame();
+        });
     </script>
 </body>
 </html>

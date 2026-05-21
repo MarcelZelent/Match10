@@ -1,12 +1,13 @@
 {
-  "name": "Gry Dla Mamy",
-  "short_name": "Gry",
-  "description": "Play Make 10 and Sudoku puzzle games offline",
-  "start_url": "https://marcelzelent.github.io/Match10/",
+  "name": "Gry Liczbowe - Make 10 & Sudoku",
+  "short_name": "Gry Liczbowe",
+  "description": "Graj w Make 10 i Sudoku offline",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#667eea",
   "orientation": "portrait",
+  "lang": "pl",
   "icons": [
     {
       "src": "icons/192.png",
