@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Make 10 - Number Matching Game</title>
+    <title>Number Games - Make 10 & Sudoku</title>
     <style>
         * {
             margin: 0;
@@ -21,420 +21,99 @@
             padding: 20px;
         }
 
-        .game-container {
+        .container {
             background: white;
             border-radius: 20px;
-            padding: 30px;
+            padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
+            max-width: 600px;
             width: 100%;
+            text-align: center;
         }
 
         h1 {
-            text-align: center;
             color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2em;
+            margin-bottom: 15px;
+            font-size: 2.5em;
         }
 
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f0f0f0;
-            border-radius: 10px;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
+        .subtitle {
             color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
         }
 
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .grid {
+        .games-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        .cell {
-            aspect-ratio: 1;
+        .game-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 10px;
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .game-icon {
+            font-size: 4em;
+        }
+
+        .game-title {
             font-size: 1.5em;
             font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .cell:hover:not(.empty):not(.selected) {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .cell.selected {
-            background: #ffd700;
-            color: #333;
-            transform: scale(1.05);
-        }
-
-        .cell.empty {
-            background: #e0e0e0;
-            cursor: default;
-        }
-
-        .cell.matched {
-            animation: matchAnimation 0.5s ease;
-        }
-
-        @keyframes matchAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2) rotate(5deg); background: #4ade80; }
-            100% { transform: scale(0); }
-        }
-
-        .buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .new-game-btn {
-            background: #4ade80;
-            color: white;
-        }
-
-        .new-game-btn:hover {
-            background: #22c55e;
-            transform: translateY(-2px);
-        }
-
-        .add-row-btn {
-            background: #667eea;
-            color: white;
-        }
-
-        .add-row-btn:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-        }
-
-        .add-row-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .message {
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .message.success {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .message.error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .message.info {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .game-over {
-            background: #fef3c7;
-            color: #92400e;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .instructions {
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .game-description {
             font-size: 0.9em;
-            color: #555;
+            opacity: 0.9;
         }
 
-        .instructions h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .instructions ul {
-            margin-left: 20px;
-        }
-
-        .instructions li {
-            margin-bottom: 5px;
+        .footer {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>🎯 Make 10</h1>
+    <div class="container">
+        <h1>🎮 Number Games</h1>
+        <p class="subtitle">Choose a game to play</p>
         
-        <div class="instructions">
-            <h3>How to Play:</h3>
-            <ul>
-                <li>Click two adjacent numbers that sum to 10</li>
-                <li>Or click two identical numbers (pair)</li>
-                <li>Numbers must be horizontally or vertically adjacent</li>
-                <li>Clear all numbers to win!</li>
-            </ul>
+        <div class="games-grid">
+            <a href="make10.html" class="game-card">
+                <div class="game-icon">🎯</div>
+                <div class="game-title">Make 10</div>
+                <div class="game-description">Match numbers that sum to 10 or form pairs</div>
+            </a>
+            
+            <a href="sudoku.html" class="game-card">
+                <div class="game-icon">🧩</div>
+                <div class="game-title">Sudoku</div>
+                <div class="game-description">Classic number puzzle with multiple difficulty levels</div>
+            </a>
         </div>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-label">Score</div>
-                <div class="stat-value" id="score">0</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">Moves</div>
-                <div class="stat-value" id="moves">0</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">Rows Left</div>
-                <div class="stat-value" id="rows-left">3</div>
-            </div>
-        </div>
-
-        <div class="message" id="message"></div>
-
-        <div class="grid" id="grid"></div>
-
-        <div class="buttons">
-            <button class="new-game-btn" onclick="newGame()">New Game</button>
-            <button class="add-row-btn" id="add-row-btn" onclick="addRow()">Add Row (3 left)</button>
+        
+        <div class="footer">
+            Made with ❤️ | Free to play
         </div>
     </div>
-
-    <script>
-        let grid = [];
-        let selectedCell = null;
-        let score = 0;
-        let moves = 0;
-        let rowsLeft = 3;
-        const COLS = 5;
-        const INITIAL_ROWS = 4;
-
-        function initGame() {
-            grid = [];
-            selectedCell = null;
-            score = 0;
-            moves = 0;
-            rowsLeft = 3;
-            
-            // Create initial grid
-            for (let i = 0; i < INITIAL_ROWS; i++) {
-                addNewRow();
-            }
-            
-            updateDisplay();
-            showMessage('Match numbers that sum to 10!', 'info');
-        }
-
-        function addNewRow() {
-            const row = [];
-            for (let i = 0; i < COLS; i++) {
-                row.push(Math.floor(Math.random() * 9) + 1); // Numbers 1-9
-            }
-            grid.push(row);
-        }
-
-        function addRow() {
-            if (rowsLeft > 0) {
-                addNewRow();
-                rowsLeft--;
-                updateDisplay();
-                showMessage(`Row added! ${rowsLeft} rows remaining`, 'info');
-            }
-        }
-
-        function renderGrid() {
-            const gridElement = document.getElementById('grid');
-            gridElement.innerHTML = '';
-            
-            // Adjust grid columns dynamically
-            gridElement.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-            
-            for (let row = 0; row < grid.length; row++) {
-                for (let col = 0; col < COLS; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    
-                    if (grid[row][col] === 0) {
-                        cell.classList.add('empty');
-                    } else {
-                        cell.textContent = grid[row][col];
-                        cell.onclick = () => selectCell(row, col);
-                        
-                        if (selectedCell && selectedCell.row === row && selectedCell.col === col) {
-                            cell.classList.add('selected');
-                        }
-                    }
-                    
-                    gridElement.appendChild(cell);
-                }
-            }
-        }
-
-        function selectCell(row, col) {
-            if (grid[row][col] === 0) return;
-
-            if (!selectedCell) {
-                selectedCell = { row, col, value: grid[row][col] };
-                renderGrid();
-                showMessage('Select an adjacent cell', 'info');
-            } else {
-                if (selectedCell.row === row && selectedCell.col === col) {
-                    // Deselect
-                    selectedCell = null;
-                    renderGrid();
-                    showMessage('Selection cleared', 'info');
-                } else {
-                    tryMatch(selectedCell, { row, col, value: grid[row][col] });
-                }
-            }
-        }
-
-        function areAdjacent(cell1, cell2) {
-            const rowDiff = Math.abs(cell1.row - cell2.row);
-            const colDiff = Math.abs(cell1.col - cell2.col);
-            
-            // Check if horizontally or vertically adjacent
-            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
-        }
-
-        function tryMatch(cell1, cell2) {
-            if (!areAdjacent(cell1, cell2)) {
-                showMessage('Cells must be adjacent!', 'error');
-                selectedCell = null;
-                renderGrid();
-                return;
-            }
-
-            const sum = cell1.value + cell2.value;
-            const isPair = cell1.value === cell2.value;
-
-            if (sum === 10 || isPair) {
-                // Valid match!
-                moves++;
-                score += sum;
-                
-                // Mark cells as matched with animation
-                const cells = document.querySelectorAll('.cell');
-                const index1 = cell1.row * COLS + cell1.col;
-                const index2 = cell2.row * COLS + cell2.col;
-                
-                cells[index1].classList.add('matched');
-                cells[index2].classList.add('matched');
-                
-                setTimeout(() => {
-                    grid[cell1.row][cell1.col] = 0;
-                    grid[cell2.row][cell2.col] = 0;
-                    selectedCell = null;
-                    compactGrid();
-                    updateDisplay();
-                    checkWin();
-                }, 500);
-                
-                showMessage(isPair ? `Pair matched! +${sum}` : `Perfect 10! +${sum}`, 'success');
-            } else {
-                showMessage(`${cell1.value} + ${cell2.value} = ${sum}. Need 10 or matching pairs!`, 'error');
-                selectedCell = null;
-                renderGrid();
-            }
-        }
-
-        function compactGrid() {
-            // Remove empty columns and compact grid
-            for (let row = 0; row < grid.length; row++) {
-                grid[row] = grid[row].filter(cell => cell !== 0);
-                while (grid[row].length < COLS) {
-                    grid[row].push(0);
-                }
-            }
-        }
-
-        function checkWin() {
-            const hasNumbers = grid.some(row => row.some(cell => cell !== 0));
-            
-            if (!hasNumbers) {
-                showMessage(`🎉 You Win! Score: ${score} in ${moves} moves!`, 'success');
-                setTimeout(() => {
-                    if (confirm(`Congratulations! You scored ${score} points in ${moves} moves!\n\nPlay again?`)) {
-                        newGame();
-                    }
-                }, 500);
-            }
-        }
-
-        function updateDisplay() {
-            document.getElementById('score').textContent = score;
-            document.getElementById('moves').textContent = moves;
-            document.getElementById('rows-left').textContent = rowsLeft;
-            
-            const addRowBtn = document.getElementById('add-row-btn');
-            addRowBtn.textContent = `Add Row (${rowsLeft} left)`;
-            addRowBtn.disabled = rowsLeft === 0;
-            
-            renderGrid();
-        }
-
-        function showMessage(text, type) {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = 'message ' + type;
-        }
-
-        function newGame() {
-            initGame();
-        }
-
-        // Start the game
-        initGame();
-    </script>
 </body>
 </html>
