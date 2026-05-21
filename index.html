@@ -26,31 +26,20 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
 
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
-            width: 100%;
-            text-align: center;
-        }
-
         .language-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
             background: white;
             border-radius: 25px;
             padding: 8px 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             display: flex;
             gap: 10px;
+            margin-bottom: 20px;
         }
 
         .lang-btn {
@@ -72,6 +61,16 @@
         .lang-btn.active {
             background: #667eea;
             color: white;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
         }
 
         h1 {
@@ -124,6 +123,7 @@
         .game-description {
             font-size: 0.9em;
             opacity: 0.9;
+            line-height: 1.4;
         }
 
         .footer {
@@ -153,14 +153,58 @@
         }
 
         @media (max-width: 600px) {
-            .language-toggle {
-                position: static;
-                margin-bottom: 20px;
-                justify-content: center;
+            .container {
+                padding: 30px 20px;
             }
 
             h1 {
                 font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+                margin-bottom: 30px;
+            }
+
+            .game-icon {
+                font-size: 3em;
+            }
+
+            .game-title {
+                font-size: 1.3em;
+            }
+
+            .game-description {
+                font-size: 0.85em;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .game-card {
+                padding: 25px 15px;
+            }
+
+            .language-toggle {
+                margin-bottom: 15px;
+                padding: 6px 12px;
+            }
+
+            .lang-btn {
+                padding: 6px 12px;
+                font-size: 0.85em;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 1.7em;
+            }
+
+            .container {
+                padding: 25px 15px;
             }
         }
     </style>
@@ -199,7 +243,7 @@
     <script>
         const translations = {
             pl: {
-                mainTitle: '🎮 Gry Liczbowe',
+                mainTitle: '🎮 Gry Dla Mamy',
                 subtitle: 'Wybierz grę',
                 game1Title: 'Make 10',
                 game1Desc: 'Dopasuj liczby, które sumują się do 10 lub tworzą pary',
