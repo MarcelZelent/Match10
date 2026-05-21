@@ -122,7 +122,18 @@
         
         <div class="footer">
             Made with ❤️ | Free to play
-        </div>
+            <br>
+            <button id="installBtn" style="
+                margin-top: 15px;
+                padding: 10px 20px;
+                background: #4ade80;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: bold;
+                display: none;
+            " onclick="installApp()">📱 Install App</button>
     </div>
 
     <!-- PWA Installation Script - ADD THIS -->
@@ -142,26 +153,38 @@
 
         // Install prompt
         let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
-            // Show install button (optional - you can add a button to trigger this)
-            console.log('App can be installed');
+            // Show install button
+            if (installBtn) {
+                installBtn.style.display = 'inline-block';
+            }
         });
 
-        // Optional: Add install button functionality
         function installApp() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
+                        console.log('User installed the app');
+                        if (installBtn) {
+                            installBtn.style.display = 'none';
+                        }
                     }
                     deferredPrompt = null;
                 });
             }
         }
+
+        // Hide button if already installed
+        window.addEventListener('appinstalled', () => {
+            if (installBtn) {
+                installBtn.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
