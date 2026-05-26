@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Lines - Gra z kulkami</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/192.png">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 620px;
+            width: 100%;
+        }
+
+        .language-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: #667eea;
+            font-size: 0.8em;
+        }
+
+        .lang-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .lang-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            gap: 10px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .message {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 4px;
+            background: #333;
+            border: 3px solid #333;
+            border-radius: 10px;
+            padding: 4px;
+            margin: 0 auto 20px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: #f8fafc;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.15s ease, transform 0.15s ease;
+            position: relative;
+        }
+
+        .cell:hover {
+            background: #eef2ff;
+        }
+
+        .cell.selected {
+            background: #ffd966;
+            transform: scale(1.04);
+        }
+
+        .cell.path {
+            background: #bfdbfe;
+        }
+
+        .cell.path::after {
+            content: '';
+            width: 22%;
+            height: 22%;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.55);
+            position: absolute;
+        }
+
+        .cell.path-start,
+        .cell.path-end {
+            background: #93c5fd;
+        }
+
+        .ball {
+            width: 72%;
+            height: 72%;
+            border-radius: 50%;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.22), inset 4px 4px 8px rgba(255,255,255,0.45), 0 3px 7px rgba(0,0,0,0.3);
+            animation: popIn 0.22s ease;
+            z-index: 2;
+        }
+
+        .ball.moving {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.07s linear;
+            animation: none;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: scale(0.2);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .red { background: #ef4444; }
+        .blue { background: #3b82f6; }
+        .green { background: #22c55e; }
+        .yellow { background: #facc15; }
+        .purple { background: #a855f7; }
+        .orange { background: #fb923c; }
+        .pink { background: #ec4899; }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .new-game-btn {
+            background: #4ade80;
+            color: white;
+        }
+
+        .new-game-btn:hover {
+            background: #22c55e;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.7em;
+            }
+
+            .board {
+                gap: 3px;
+                padding: 3px;
+            }
+
+            .stats {
+                padding: 12px;
+            }
+
+            .stat-label {
+                font-size: 0.8em;
+            }
+
+            .stat-value {
+                font-size: 1.25em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="language-toggle">
+            <button class="lang-btn active" onclick="setLanguage('pl')">🇵🇱 PL</button>
+            <button class="lang-btn" onclick="setLanguage('en')">🇬🇧 EN</button>
+        </div>
+
+        <h1 id="title">🔴 Color Lines</h1>
+
+        <div class="back-link">
+            <a href="index.html" id="back-link">← Powrót do gier</a>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-label" id="score-label">Wynik</div>
+                <div class="stat-value" id="score">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label" id="balls-label">Kulki</div>
+                <div class="stat-value" id="balls-count">0/81</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label" id="next-label">Następne</div>
+                <div class="stat-value" id="next-count">3</div>
+            </div>
+        </div>
+
+        <div class="message info" id="message"></div>
+
+        <div class="board" id="board"></div>
+
+        <div class="buttons">
+            <button class="new-game-btn" onclick="newGame()" id="new-game-btn">Nowa gra</button>
+        </div>
+
+        <div class="instructions">
+            <h3 id="how-to-play">Jak grać:</h3>
+            <ul id="instructions-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            pl: {
+                title: '🔴 Color Lines',
+                backLink: '← Powrót do gier',
+                scoreLabel: 'Wynik',
+                ballsLabel: 'Kulki',
+                nextLabel: 'Następne',
+                newGameBtn: 'Nowa gra',
+                howToPlay: 'Jak grać:',
+                instructions: [
+                    'Kliknij kulkę, aby ją wybrać.',
+                    'Kliknij puste pole, aby przesunąć kulkę. Musi istnieć wolna ścieżka.',
+                    'Po każdym ruchu pojawiają się 3 nowe kulki.',
+                    'Ułóż 5 kulek tego samego koloru w linii: poziomo, pionowo lub po skosie.',
+                    'Linia znika i dostajesz punkty.'
+                ],
+                msgStart: 'Wybierz kulkę i przesuń ją na puste pole.',
+                msgSelectBall: 'Kulka wybrana. Wybierz dostępne puste pole.',
+                msgChooseBall: 'Najpierw wybierz kulkę.',
+                msgBlocked: 'Nie ma wolnej ścieżki do tego pola.',
+                msgLineCleared: 'Świetnie! Usunięto linię. +',
+                msgGameOver: 'Koniec gry! Twój wynik:',
+                confirmGameOver: 'Koniec gry! Twój wynik:',
+                confirmPlayAgain: 'Grać ponownie?'
+            },
+            en: {
+                title: '🔴 Color Lines',
+                backLink: '← Back to Games',
+                scoreLabel: 'Score',
+                ballsLabel: 'Balls',
+                nextLabel: 'Next',
+                newGameBtn: 'New Game',
+                howToPlay: 'How to Play:',
+                instructions: [
+                    'Click a ball to select it.',
+                    'Click an empty square to move the ball. There must be a free path.',
+                    'After every move, 3 new balls appear.',
+                    'Make a line of 5 balls of the same color: horizontal, vertical, or diagonal.',
+                    'The line disappears and you get points.'
+                ],
+                msgStart: 'Choose a ball and move it to an empty square.',
+                msgSelectBall: 'Ball selected. Choose a reachable empty square.',
+                msgChooseBall: 'Choose a ball first.',
+                msgBlocked: 'There is no free path to that square.',
+                msgLineCleared: 'Nice! Line cleared. +',
+                msgGameOver: 'Game over! Your score:',
+                confirmGameOver: 'Game over! Your score:',
+                confirmPlayAgain: 'Play again?'
+            }
+        };
+
+        const SIZE = 9;
+        const INITIAL_BALLS = 5;
+        const BALLS_PER_TURN = 3;
+        const LINE_LENGTH = 5;
+        const MOVE_STEP_MS = 55;
+        const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink'];
+
+        let currentLang = 'pl';
+        let board = [];
+        let selectedCell = null;
+        let score = 0;
+        let gameOver = false;
+        let isAnimating = false;
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            const activeButton = document.querySelector(`.lang-btn[onclick="setLanguage('${lang}')"]`);
+            if (activeButton) activeButton.classList.add('active');
+
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLang];
+
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('back-link').textContent = t.backLink;
+            document.getElementById('score-label').textContent = t.scoreLabel;
+            document.getElementById('balls-label').textContent = t.ballsLabel;
+            document.getElementById('next-label').textContent = t.nextLabel;
+            document.getElementById('new-game-btn').textContent = t.newGameBtn;
+            document.getElementById('how-to-play').textContent = t.howToPlay;
+            document.getElementById('instructions-list').innerHTML = t.instructions.map(item => `<li>${item}</li>`).join('');
+
+            document.documentElement.lang = currentLang;
+        }
+
+        function newGame() {
+            board = Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
+            selectedCell = null;
+            score = 0;
+            gameOver = false;
+            isAnimating = false;
+
+            buildBoardOnce();
+            addRandomBalls(INITIAL_BALLS);
+            updateAllCells();
+            updateStats();
+            showMessage(translations[currentLang].msgStart, 'info');
+        }
+
+        function buildBoardOnce() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+
+            for (let row = 0; row < SIZE; row++) {
+                for (let col = 0; col < SIZE; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', () => handleCellClick(row, col));
+                    boardElement.appendChild(cell);
+                }
+            }
+        }
+
+        function getCellElement(row, col) {
+            return document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+        }
+
+        function updateAllCells() {
+            for (let row = 0; row < SIZE; row++) {
+                for (let col = 0; col < SIZE; col++) {
+                    updateCell(row, col);
+                }
+            }
+            updateSelectionClass();
+        }
+
+        function updateCell(row, col) {
+            const cell = getCellElement(row, col);
+            if (!cell) return;
+
+            cell.innerHTML = '';
+            cell.classList.remove('selected', 'path', 'path-start', 'path-end');
+
+            const color = board[row][col];
+            if (color) {
+                const ball = document.createElement('div');
+                ball.className = `ball ${color}`;
+                cell.appendChild(ball);
+            }
+        }
+
+        function updateSelectionClass() {
+            document.querySelectorAll('.cell.selected').forEach(cell => cell.classList.remove('selected'));
+
+            if (!selectedCell) return;
+
+            const cell = getCellElement(selectedCell.row, selectedCell.col);
+            if (cell) cell.classList.add('selected');
+        }
+
+        function clearPathClasses() {
+            document.querySelectorAll('.cell.path, .cell.path-start, .cell.path-end').forEach(cell => {
+                cell.classList.remove('path', 'path-start', 'path-end');
+            });
+        }
+
+        function showPath(path) {
+            clearPathClasses();
+
+            path.forEach((point, index) => {
+                const cell = getCellElement(point.row, point.col);
+                if (!cell) return;
+
+                cell.classList.add('path');
+                if (index === 0) cell.classList.add('path-start');
+                if (index === path.length - 1) cell.classList.add('path-end');
+            });
+        }
+
+        function handleCellClick(row, col) {
+            if (gameOver || isAnimating) return;
+
+            const color = board[row][col];
+            const t = translations[currentLang];
+
+            if (color) {
+                clearPathClasses();
+                selectedCell = { row, col };
+                updateSelectionClass();
+                showMessage(t.msgSelectBall, 'info');
+                return;
+            }
+
+            if (!selectedCell) {
+                showMessage(t.msgChooseBall, 'info');
+                return;
+            }
+
+            const path = findPath(selectedCell, { row, col });
+
+            if (!path) {
+                clearPathClasses();
+                showMessage(t.msgBlocked, 'error');
+                return;
+            }
+
+            moveSelectedBall(row, col, path);
+        }
+
+        function findPath(start, target) {
+            const queue = [start];
+            const visited = Array(SIZE).fill(null).map(() => Array(SIZE).fill(false));
+            const previous = Array(SIZE).fill(null).map(() => Array(SIZE).fill(null));
+            const directions = [
+                { dr: -1, dc: 0 },
+                { dr: 1, dc: 0 },
+                { dr: 0, dc: -1 },
+                { dr: 0, dc: 1 }
+            ];
+
+            visited[start.row][start.col] = true;
+
+            while (queue.length > 0) {
+                const current = queue.shift();
+
+                if (current.row === target.row && current.col === target.col) {
+                    return reconstructPath(previous, start, target);
+                }
+
+                for (const direction of directions) {
+                    const nextRow = current.row + direction.dr;
+                    const nextCol = current.col + direction.dc;
+
+                    if (!isInsideBoard(nextRow, nextCol)) continue;
+                    if (visited[nextRow][nextCol]) continue;
+                    if (board[nextRow][nextCol] && !(nextRow === target.row && nextCol === target.col)) continue;
+
+                    visited[nextRow][nextCol] = true;
+                    previous[nextRow][nextCol] = current;
+                    queue.push({ row: nextRow, col: nextCol });
+                }
+            }
+
+            return null;
+        }
+
+        function reconstructPath(previous, start, target) {
+            const path = [];
+            let current = target;
+
+            while (current) {
+                path.unshift(current);
+
+                if (current.row === start.row && current.col === start.col) {
+                    return path;
+                }
+
+                current = previous[current.row][current.col];
+            }
+
+            return null;
+        }
+
+        async function moveSelectedBall(targetRow, targetCol, path) {
+            const t = translations[currentLang];
+            const startRow = selectedCell.row;
+            const startCol = selectedCell.col;
+            const movingColor = board[startRow][startCol];
+
+            isAnimating = true;
+            showPath(path);
+
+            board[startRow][startCol] = null;
+            updateCell(startRow, startCol);
+            selectedCell = null;
+            updateSelectionClass();
+
+            await animateBallAlongPath(movingColor, path);
+
+            board[targetRow][targetCol] = movingColor;
+            updateCell(targetRow, targetCol);
+            clearPathClasses();
+
+            const clearedAfterMove = clearLines();
+
+            if (!clearedAfterMove) {
+                const addedCells = addRandomBalls(BALLS_PER_TURN);
+                addedCells.forEach(cell => updateCell(cell.row, cell.col));
+                clearLines();
+            }
+
+            updateStats();
+            isAnimating = false;
+
+            if (isBoardFull()) {
+                endGame();
+                return;
+            }
+
+            if (clearedAfterMove) {
+                showMessage(t.msgLineCleared + clearedAfterMove, 'success');
+            } else {
+                showMessage(t.msgStart, 'info');
+            }
+        }
+
+        function animateBallAlongPath(color, path) {
+            return new Promise(resolve => {
+                if (path.length <= 1) {
+                    resolve();
+                    return;
+                }
+
+                const firstCell = getCellElement(path[0].row, path[0].col);
+                if (!firstCell) {
+                    resolve();
+                    return;
+                }
+
+                const firstRect = firstCell.getBoundingClientRect();
+                const ballSize = firstRect.width * 0.72;
+                const movingBall = document.createElement('div');
+                movingBall.className = `ball ${color} moving`;
+                movingBall.style.width = `${ballSize}px`;
+                movingBall.style.height = `${ballSize}px`;
+                movingBall.style.left = `${firstRect.left + (firstRect.width - ballSize) / 2}px`;
+                movingBall.style.top = `${firstRect.top + (firstRect.height - ballSize) / 2}px`;
+                movingBall.style.transform = 'translate(0px, 0px)';
+                document.body.appendChild(movingBall);
+
+                let step = 1;
+
+                function moveNextStep() {
+                    if (step >= path.length) {
+                        movingBall.remove();
+                        resolve();
+                        return;
+                    }
+
+                    const nextCell = getCellElement(path[step].row, path[step].col);
+                    if (!nextCell) {
+                        movingBall.remove();
+                        resolve();
+                        return;
+                    }
+
+                    const nextRect = nextCell.getBoundingClientRect();
+                    const dx = nextRect.left - firstRect.left;
+                    const dy = nextRect.top - firstRect.top;
+                    movingBall.style.transform = `translate(${dx}px, ${dy}px)`;
+
+                    step++;
+                    setTimeout(moveNextStep, MOVE_STEP_MS);
+                }
+
+                requestAnimationFrame(moveNextStep);
+            });
+        }
+
+        function addRandomBalls(count) {
+            const emptyCells = getEmptyCells();
+            const ballsToAdd = Math.min(count, emptyCells.length);
+            const addedCells = [];
+
+            for (let i = 0; i < ballsToAdd; i++) {
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                const cell = emptyCells.splice(randomIndex, 1)[0];
+                board[cell.row][cell.col] = getRandomColor();
+                addedCells.push(cell);
+            }
+
+            return addedCells;
+        }
+
+        function getRandomColor() {
+            return COLORS[Math.floor(Math.random() * COLORS.length)];
+        }
+
+        function getEmptyCells() {
+            const emptyCells = [];
+
+            for (let row = 0; row < SIZE; row++) {
+                for (let col = 0; col < SIZE; col++) {
+                    if (!board[row][col]) {
+                        emptyCells.push({ row, col });
+                    }
+                }
+            }
+
+            return emptyCells;
+        }
+
+        function clearLines() {
+            const cellsToClear = new Set();
+            const directions = [
+                { dr: 0, dc: 1 },
+                { dr: 1, dc: 0 },
+                { dr: 1, dc: 1 },
+                { dr: 1, dc: -1 }
+            ];
+
+            for (let row = 0; row < SIZE; row++) {
+                for (let col = 0; col < SIZE; col++) {
+                    const color = board[row][col];
+                    if (!color) continue;
+
+                    for (const direction of directions) {
+                        const line = getLine(row, col, direction.dr, direction.dc, color);
+
+                        if (line.length >= LINE_LENGTH) {
+                            line.forEach(cell => cellsToClear.add(`${cell.row},${cell.col}`));
+                        }
+                    }
+                }
+            }
+
+            if (cellsToClear.size === 0) {
+                return 0;
+            }
+
+            cellsToClear.forEach(key => {
+                const [row, col] = key.split(',').map(Number);
+                board[row][col] = null;
+                updateCell(row, col);
+            });
+
+            const points = cellsToClear.size * 10;
+            score += points;
+            return points;
+        }
+
+        function getLine(startRow, startCol, dr, dc, color) {
+            const line = [];
+            let row = startRow;
+            let col = startCol;
+
+            while (isInsideBoard(row, col) && board[row][col] === color) {
+                line.push({ row, col });
+                row += dr;
+                col += dc;
+            }
+
+            return line;
+        }
+
+        function isInsideBoard(row, col) {
+            return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
+        }
+
+        function isBoardFull() {
+            return getEmptyCells().length === 0;
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('balls-count').textContent = `${countBalls()}/${SIZE * SIZE}`;
+            document.getElementById('next-count').textContent = BALLS_PER_TURN;
+        }
+
+        function countBalls() {
+            let count = 0;
+
+            for (let row = 0; row < SIZE; row++) {
+                for (let col = 0; col < SIZE; col++) {
+                    if (board[row][col]) count++;
+                }
+            }
+
+            return count;
+        }
+
+        function showMessage(text, type) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+        }
+
+        function endGame() {
+            gameOver = true;
+            const t = translations[currentLang];
+            showMessage(`${t.msgGameOver} ${score}`, 'error');
+
+            setTimeout(() => {
+                if (confirm(`${t.confirmGameOver} ${score}\n\n${t.confirmPlayAgain}`)) {
+                    newGame();
+                }
+            }, 300);
+        }
+
+        window.addEventListener('load', () => {
+            const savedLang = localStorage.getItem('language') || 'pl';
+            setLanguage(savedLang);
+            newGame();
+        });
+    </script>
+</body>
+</html>

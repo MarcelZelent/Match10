@@ -4,6 +4,7 @@ const urlsToCache = [
   './index.html',
   './make10.html',
   './sudoku.html',
+  './balls.html',
   './manifest.json'
 ];
 

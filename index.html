@@ -231,6 +231,13 @@
                 <div class="game-title" id="game2-title">Sudoku</div>
                 <div class="game-description" id="game2-desc">Klasyczna łamigłówka liczbowa z różnymi poziomami trudności</div>
             </a>
+
+            <a href="balls.html" class="game-card">
+                <div class="game-icon">🔴</div>
+                <div class="game-title" id="game3-title">Color Lines</div>
+                <div class="game-description" id="game3-desc">Move colored balls and make lines of 5</div>
+            </a>
+
         </div>
         
         <div class="footer">
@@ -238,6 +245,11 @@
             <br>
             <button id="installBtn" onclick="installApp()">📱 <span id="install-text">Zainstaluj aplikację</span></button>
         </div>
+
+        <div id="ios-install-help" style="display:none;">
+            📱 On iPhone: tap Share, then “Add to Home Screen”.
+        </div>
+
     </div>
 
     <script>
@@ -250,7 +262,9 @@
                 game2Title: 'Sudoku',
                 game2Desc: 'Klasyczna łamigłówka liczbowa z różnymi poziomami trudności',
                 footerText: 'Stworzone z ❤️ | Graj za darmo',
-                installText: 'Zainstaluj aplikację'
+                installText: 'Zainstaluj aplikację',
+                game3Title: 'Color Lines',
+                game3Desc: 'Przesuwaj kolorowe kulki i układaj linie po 5'
             },
             en: {
                 mainTitle: '🎮 Number Games',
@@ -260,7 +274,9 @@
                 game2Title: 'Sudoku',
                 game2Desc: 'Classic number puzzle with multiple difficulty levels',
                 footerText: 'Made with ❤️ | Free to play',
-                installText: 'Install App'
+                installText: 'Install App',
+                game3Title: 'Color Lines',
+                game3Desc: 'Move colored balls and make lines of 5'
             }
         };
 
@@ -281,6 +297,8 @@
             document.getElementById('game1-desc').textContent = t.game1Desc;
             document.getElementById('game2-title').textContent = t.game2Title;
             document.getElementById('game2-desc').textContent = t.game2Desc;
+            document.getElementById('game3-title').textContent = t.game3Title;
+            document.getElementById('game3-desc').textContent = t.game3Desc;
             document.getElementById('footer-text').textContent = t.footerText;
             document.getElementById('install-text').textContent = t.installText;
             
@@ -336,6 +354,22 @@
         window.addEventListener('appinstalled', () => {
             if (installBtn) {
                 installBtn.style.display = 'none';
+            }
+        });
+        function isIos() {
+            return /iphone|ipad|ipod/i.test(navigator.userAgent);
+        }
+
+        function isInStandaloneMode() {
+            return window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+        }
+
+        window.addEventListener('load', () => {
+            const iosInstallHelp = document.getElementById('ios-install-help');
+
+            if (iosInstallHelp && isIos() && !isInStandaloneMode()) {
+                iosInstallHelp.style.display = 'block';
             }
         });
     </script>
