@@ -184,11 +184,6 @@
             background: #ffd966;
         }
 
-        .sudoku-cell.error {
-            background: #ffb3b3;
-            color: #cc0000;
-        }
-
         .sudoku-cell.same-number {
             background: #d4e4f7;
         }
@@ -359,8 +354,8 @@
                 <div class="stat-value" id="timer">00:00</div>
             </div>
             <div class="stat">
-                <div class="stat-label" id="mistakes-label">Błędy</div>
-                <div class="stat-value" id="mistakes">0</div>
+                <div class="stat-label" id="progress-label">Postęp</div>
+                <div class="stat-value" id="progress">0%</div>
             </div>
         </div>
 
@@ -399,7 +394,7 @@
                 diffExpert: 'Ekspert',
                 diffLabel: 'Poziom',
                 timeLabel: 'Czas',
-                mistakesLabel: 'Błędy',
+                progressLabel: 'Postęp',
                 clearNumBtn: 'Wyczyść',
                 newGameBtn: 'Nowa gra',
                 checkBtn: 'Sprawdź',
@@ -415,11 +410,8 @@
                 msgBoardCleared: 'Plansza wyczyszczona!',
                 confirmClear: 'Czy na pewno chcesz wyczyścić wszystkie wpisy?',
                 msgWin: '🎉 Gratulacje! Wygrałeś w',
-                msgWinWith: 'z',
-                msgWinMistakes: 'błędami!',
                 msgWinComplete: 'Niesamowite! Ukończyłeś',
                 msgWinPuzzle: 'puzzle!\nCzas:',
-                msgWinErrors: '\nBłędy:',
                 msgWinPlayAgain: '\n\nGrać ponownie?'
             },
             en: {
@@ -430,7 +422,7 @@
                 diffExpert: 'Expert',
                 diffLabel: 'Difficulty',
                 timeLabel: 'Time',
-                mistakesLabel: 'Mistakes',
+                progressLabel: 'Progress',
                 clearNumBtn: 'Clear',
                 newGameBtn: 'New Game',
                 checkBtn: 'Check',
@@ -446,11 +438,8 @@
                 msgBoardCleared: 'Board cleared!',
                 confirmClear: 'Are you sure you want to clear all your entries?',
                 msgWin: '🎉 Congratulations! You won in',
-                msgWinWith: 'with',
-                msgWinMistakes: 'mistakes!',
                 msgWinComplete: 'Amazing! You completed the',
                 msgWinPuzzle: 'puzzle!\nTime:',
-                msgWinErrors: '\nMistakes:',
                 msgWinPlayAgain: '\n\nPlay again?'
             }
         };
@@ -461,7 +450,6 @@
         let fixedCells = [];
         let selectedCell = null;
         let difficulty = 'easy';
-        let mistakes = 0;
         let startTime = null;
         let timerInterval = null;
 
@@ -484,9 +472,13 @@
             localStorage.setItem('language', lang);
             
             document.querySelectorAll('.lang-btn').forEach(btn => {
-                const isActive = btn.textContent.includes(lang === 'pl' ? 'PL' : 'EN');
-                btn.classList.toggle('active', isActive);
+                btn.classList.remove('active');
             });
+
+            const activeButton = document.querySelector(`.lang-btn[onclick="setLanguage('${lang}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
             
             updateLanguage();
         }
@@ -500,23 +492,27 @@
             document.getElementById('diff-expert').textContent = t.diffExpert;
             document.getElementById('diff-label').textContent = t.diffLabel;
             document.getElementById('time-label').textContent = t.timeLabel;
-            document.getElementById('mistakes-label').textContent = t.mistakesLabel;
+            document.getElementById('progress-label').textContent = t.progressLabel;
             document.getElementById('clear-num-btn').textContent = t.clearNumBtn;
             document.getElementById('new-game-btn').textContent = t.newGameBtn;
             document.getElementById('check-btn').textContent = t.checkBtn;
             document.getElementById('hint-btn').textContent = t.hintBtn;
             document.getElementById('clear-board-btn').textContent = t.clearBoardBtn;
-            
             document.getElementById('difficulty').textContent = DIFFICULTY_NAMES[difficulty][currentLang];
-            
             document.documentElement.lang = currentLang;
         }
 
         function setDifficulty(level) {
             difficulty = level;
             document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.id === `diff-${level}`);
+                btn.classList.remove('active');
             });
+
+            const activeButton = document.getElementById(`diff-${level}`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+
             newGame();
         }
 
@@ -524,9 +520,8 @@
             solution = generateSolvedBoard();
             board = JSON.parse(JSON.stringify(solution));
             removeNumbers(DIFFICULTIES[difficulty]);
-            fixedCells = board.map(row => row.map(cell => cell !== 0));
+            fixedCells = board.map(row => row.map(value => value !== 0));
             
-            mistakes = 0;
             selectedCell = null;
             startTime = Date.now();
             
@@ -640,7 +635,7 @@
         function highlightCells() {
             const cells = document.querySelectorAll('.sudoku-cell');
             cells.forEach(cell => {
-                cell.classList.remove('selected', 'same-number', 'error');
+                cell.classList.remove('selected', 'same-number');
             });
             
             if (!selectedCell) return;
@@ -656,11 +651,6 @@
                     cell.classList.add('selected');
                 } else if (currentNum !== 0 && board[cellRow][cellCol] === currentNum) {
                     cell.classList.add('same-number');
-                }
-                
-                if (board[cellRow][cellCol] !== 0 && 
-                    board[cellRow][cellCol] !== solution[cellRow][cellCol]) {
-                    cell.classList.add('error');
                 }
             });
         }
@@ -679,15 +669,7 @@
                 return;
             }
             
-            if (num === 0) {
-                board[row][col] = 0;
-            } else {
-                board[row][col] = num;
-                
-                if (num !== solution[row][col]) {
-                    mistakes++;
-                }
-            }
+            board[row][col] = num;
             
             renderBoard();
             updateStats();
@@ -739,8 +721,6 @@
             } else {
                 showMessage(t.msgSomeIncorrect, 'error');
             }
-            
-            renderBoard();
         }
 
         function getHint() {
@@ -753,7 +733,11 @@
             
             const { row, col } = selectedCell;
             
-            if (fixedCells[row][col] || board[row][col] === solution[row][col]) {
+            if (fixedCells[row][col]) {
+                return;
+            }
+
+            if (board[row][col] === solution[row][col]) {
                 showMessage(t.msgCellCorrect, 'info');
                 return;
             }
@@ -761,6 +745,7 @@
             board[row][col] = solution[row][col];
             showMessage(`${t.msgHint} ${solution[row][col]}`, 'success');
             renderBoard();
+            updateStats();
             checkWin();
         }
 
@@ -775,6 +760,7 @@
                     }
                 }
                 renderBoard();
+                updateStats();
                 showMessage(t.msgBoardCleared, 'info');
             }
         }
@@ -791,8 +777,8 @@
             const t = translations[currentLang];
             
             setTimeout(() => {
-                showMessage(`${t.msgWin} ${time} ${t.msgWinWith} ${mistakes} ${t.msgWinMistakes}`, 'success');
-                if (confirm(`${t.msgWinComplete} ${DIFFICULTY_NAMES[difficulty][currentLang]} ${t.msgWinPuzzle} ${time}${t.msgWinErrors} ${mistakes}${t.msgWinPlayAgain}`)) {
+                showMessage(`${t.msgWin} ${time}`, 'success');
+                if (confirm(`${t.msgWinComplete} ${DIFFICULTY_NAMES[difficulty][currentLang]} ${t.msgWinPuzzle} ${time}${t.msgWinPlayAgain}`)) {
                     newGame();
                 }
             }, 500);
@@ -811,7 +797,26 @@
 
         function updateStats() {
             document.getElementById('difficulty').textContent = DIFFICULTY_NAMES[difficulty][currentLang];
-            document.getElementById('mistakes').textContent = mistakes;
+            document.getElementById('progress').textContent = `${calculateProgress()}%`;
+        }
+
+        function calculateProgress() {
+            let filled = 0;
+            let totalEditable = 0;
+
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    if (!fixedCells[i][j]) {
+                        totalEditable++;
+                        if (board[i][j] !== 0) {
+                            filled++;
+                        }
+                    }
+                }
+            }
+
+            if (totalEditable === 0) return 100;
+            return Math.round((filled / totalEditable) * 100);
         }
 
         function showMessage(text, type) {
@@ -820,11 +825,22 @@
             messageEl.className = 'message ' + type;
         }
 
-        // Load saved language and START GAME AUTOMATICALLY
+        // Load saved language and start game automatically
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
-            setLanguage(savedLang);
-            newGame(); // AUTO-START THE GAME
+            currentLang = savedLang;
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const activeButton = document.querySelector(`.lang-btn[onclick="setLanguage('${savedLang}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+
+            updateLanguage();
+            newGame();
         });
     </script>
 </body>
