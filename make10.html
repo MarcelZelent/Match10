@@ -569,7 +569,7 @@
             initGame();
         }
 
-        // Load saved language
+                // Load saved language and START GAME AUTOMATICALLY
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
             currentLang = savedLang;
@@ -582,7 +582,7 @@
                 }
             });
             updateLanguage();
-            initGame();
+            initGame(); // AUTO-START THE GAME (changed from nothing)
         });
     </script>
 </body>

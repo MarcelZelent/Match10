@@ -155,6 +155,9 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .sudoku-cell:nth-child(3n):not(:nth-child(9n)) {
@@ -167,8 +170,8 @@
         }
 
         .sudoku-cell.fixed {
-            background: #f0f0f0;
-            color: #333;
+            background: #e8e8e8;
+            color: #000;
             cursor: default;
         }
 
@@ -178,20 +181,20 @@
         }
 
         .sudoku-cell.selected {
-            background: #ffe6cc;
+            background: #ffd966;
         }
 
         .sudoku-cell.error {
-            background: #ffcccc;
+            background: #ffb3b3;
             color: #cc0000;
         }
 
         .sudoku-cell.same-number {
-            background: #e6f3ff;
+            background: #d4e4f7;
         }
 
         .sudoku-cell:hover:not(.fixed) {
-            background: #fffacd;
+            background: #fff4cc;
         }
 
         .sudoku-cell:focus {
@@ -406,8 +409,6 @@
                 msgSelectCell: 'Najpierw wybierz komórkę',
                 msgCellCorrect: 'Ta komórka jest już poprawna!',
                 msgHint: 'Podpowiedź: Odpowiedź to',
-                msgIncorrect: 'Niepoprawnie! Spróbuj ponownie.',
-                msgCorrect: 'Poprawnie! ✓',
                 msgNotComplete: 'Puzzle nie jest jeszcze ukończone!',
                 msgPerfect: '🎉 Perfekcyjnie! Rozwiązałeś!',
                 msgSomeIncorrect: 'Niektóre komórki są niepoprawne. Próbuj dalej!',
@@ -439,8 +440,6 @@
                 msgSelectCell: 'Please select a cell first',
                 msgCellCorrect: 'This cell is already correct!',
                 msgHint: 'Hint: The answer is',
-                msgIncorrect: 'Incorrect! Try again.',
-                msgCorrect: 'Correct! ✓',
                 msgNotComplete: 'Puzzle is not complete yet!',
                 msgPerfect: '🎉 Perfect! You solved it!',
                 msgSomeIncorrect: 'Some cells are incorrect. Keep trying!',
@@ -686,9 +685,6 @@
                 
                 if (num !== solution[row][col]) {
                     mistakes++;
-                    showMessage(t.msgIncorrect, 'error');
-                } else {
-                    showMessage(t.msgCorrect, 'success');
                 }
             }
             
@@ -823,7 +819,7 @@
             messageEl.className = 'message ' + type;
         }
 
-        // Load saved language
+        // Load saved language and START GAME AUTOMATICALLY
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
             currentLang = savedLang;
@@ -836,7 +832,7 @@
                 }
             });
             updateLanguage();
-            newGame();
+            newGame(); // AUTO-START THE GAME
         });
     </script>
 </body>
