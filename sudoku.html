@@ -8,7 +8,7 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#667eea">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/192.png">
     
     <style>
         * {
@@ -458,6 +458,7 @@
         let currentLang = 'pl';
         let board = [];
         let solution = [];
+        let fixedCells = [];
         let selectedCell = null;
         let difficulty = 'easy';
         let mistakes = 0;
@@ -483,9 +484,9 @@
             localStorage.setItem('language', lang);
             
             document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
+                const isActive = btn.textContent.includes(lang === 'pl' ? 'PL' : 'EN');
+                btn.classList.toggle('active', isActive);
             });
-            event.target.classList.add('active');
             
             updateLanguage();
         }
@@ -508,15 +509,14 @@
             
             document.getElementById('difficulty').textContent = DIFFICULTY_NAMES[difficulty][currentLang];
             
-            document.documentElement.lang = lang;
+            document.documentElement.lang = currentLang;
         }
 
         function setDifficulty(level) {
             difficulty = level;
             document.querySelectorAll('.difficulty-btn').forEach(btn => {
-                btn.classList.remove('active');
+                btn.classList.toggle('active', btn.id === `diff-${level}`);
             });
-            event.target.classList.add('active');
             newGame();
         }
 
@@ -524,6 +524,7 @@
             solution = generateSolvedBoard();
             board = JSON.parse(JSON.stringify(solution));
             removeNumbers(DIFFICULTIES[difficulty]);
+            fixedCells = board.map(row => row.map(cell => cell !== 0));
             
             mistakes = 0;
             selectedCell = null;
@@ -607,7 +608,7 @@
                     const cell = document.createElement('div');
                     cell.className = 'sudoku-cell';
                     
-                    if (solution[i][j] === board[i][j] && board[i][j] !== 0) {
+                    if (fixedCells[i][j]) {
                         cell.classList.add('fixed');
                         cell.textContent = board[i][j];
                     } else if (board[i][j] !== 0) {
@@ -629,7 +630,7 @@
         }
 
         function selectCell(row, col) {
-            if (solution[row][col] === board[row][col] && board[row][col] !== 0) {
+            if (fixedCells[row][col]) {
                 return;
             }
             selectedCell = { row, col };
@@ -674,7 +675,7 @@
             
             const { row, col } = selectedCell;
             
-            if (solution[row][col] === board[row][col] && board[row][col] !== 0) {
+            if (fixedCells[row][col]) {
                 return;
             }
             
@@ -752,7 +753,7 @@
             
             const { row, col } = selectedCell;
             
-            if (solution[row][col] === board[row][col] && board[row][col] !== 0) {
+            if (fixedCells[row][col] || board[row][col] === solution[row][col]) {
                 showMessage(t.msgCellCorrect, 'info');
                 return;
             }
@@ -768,7 +769,7 @@
             if (confirm(t.confirmClear)) {
                 for (let i = 0; i < 9; i++) {
                     for (let j = 0; j < 9; j++) {
-                        if (board[i][j] !== solution[i][j] || board[i][j] === 0) {
+                        if (!fixedCells[i][j]) {
                             board[i][j] = 0;
                         }
                     }
@@ -822,16 +823,7 @@
         // Load saved language and START GAME AUTOMATICALLY
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
-            currentLang = savedLang;
-            const langButtons = document.querySelectorAll('.lang-btn');
-            langButtons.forEach(btn => {
-                if (btn.textContent.includes(savedLang === 'pl' ? 'PL' : 'EN')) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            updateLanguage();
+            setLanguage(savedLang);
             newGame(); // AUTO-START THE GAME
         });
     </script>

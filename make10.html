@@ -8,7 +8,7 @@
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#667eea">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/192.png">
     
     <style>
         * {
@@ -338,7 +338,7 @@
                 msgAdjacent: 'Komórki muszą być obok siebie!',
                 msgPair: 'Para dopasowana! +',
                 msgPerfect10: 'Perfekcyjna 10! +',
-                msgIncorrect: 'Need 10 lub pary!',
+                msgIncorrect: 'Potrzeba 10 lub pary!',
                 msgWin: '🎉 Wygrałeś! Wynik:',
                 msgWinMoves: 'w',
                 msgWinMovesText: 'ruchach!',
@@ -395,9 +395,9 @@
             localStorage.setItem('language', lang);
             
             document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
+                const isActive = btn.textContent.includes(lang === 'pl' ? 'PL' : 'EN');
+                btn.classList.toggle('active', isActive);
             });
-            event.target.classList.add('active');
             
             updateLanguage();
         }
@@ -416,7 +416,7 @@
             document.getElementById('new-game-btn').textContent = t.newGameBtn;
             document.getElementById('add-row-btn').textContent = `${t.addRowBtn} (${rowsLeft} ${t.left})`;
             
-            document.documentElement.lang = lang;
+            document.documentElement.lang = currentLang;
         }
 
         function initGame() {
@@ -592,16 +592,7 @@
         // Load saved language and START GAME AUTOMATICALLY
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
-            currentLang = savedLang;
-            const langButtons = document.querySelectorAll('.lang-btn');
-            langButtons.forEach(btn => {
-                if (btn.textContent.includes(savedLang === 'pl' ? 'PL' : 'EN')) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            updateLanguage();
+            setLanguage(savedLang);
             initGame();
         });
     </script>

@@ -9,7 +9,7 @@
     <meta name="description" content="Graj w Make 10 i Sudoku offline">
     <meta name="theme-color" content="#667eea">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gry Liczbowe">
@@ -267,11 +267,11 @@
         function setLanguage(lang) {
             localStorage.setItem('language', lang);
             
-            // Update button states
+            // Update button states without relying on the global event object
             document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
+                const isActive = btn.textContent.includes(lang === 'pl' ? 'Polski' : 'English');
+                btn.classList.toggle('active', isActive);
             });
-            event.target.classList.add('active');
             
             // Update text
             const t = translations[lang];
@@ -290,23 +290,13 @@
         // Load saved language or default to Polish
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
-            const langButtons = document.querySelectorAll('.lang-btn');
-            langButtons.forEach(btn => {
-                if (btn.textContent.includes(savedLang === 'pl' ? 'Polski' : 'English')) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
-            if (savedLang === 'en') {
-                setLanguage('en');
-            }
+            setLanguage(savedLang);
         });
 
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js')
                     .then(registration => {
                         console.log('SW registered:', registration);
                     })

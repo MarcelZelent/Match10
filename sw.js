@@ -1,10 +1,10 @@
-const CACHE_NAME = 'number-games-v1';
+const CACHE_NAME = 'number-games-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/make10.html',
-  '/sudoku.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './make10.html',
+  './sudoku.html',
+  './manifest.json'
 ];
 
 // Install service worker and cache files
@@ -26,7 +26,7 @@ self.addEventListener('fetch', event => {
         if (response) {
           return response;
         }
-        return fetch(event.request);
+        return fetch(event.request).catch(() => caches.match('./index.html'));
       }
     )
   );
@@ -44,6 +44,6 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
