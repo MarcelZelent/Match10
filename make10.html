@@ -228,7 +228,7 @@
             background: #f9fafb;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-top: 20px;
             font-size: 0.9em;
             color: #555;
         }
@@ -236,6 +236,7 @@
         .instructions h3 {
             color: #667eea;
             margin-bottom: 10px;
+            font-size: 1em;
         }
 
         .instructions ul {
@@ -244,6 +245,25 @@
 
         .instructions li {
             margin-bottom: 5px;
+        }
+
+        @media (max-width: 500px) {
+            .game-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.7em;
+            }
+
+            .cell {
+                font-size: 1.3em;
+            }
+
+            .instructions {
+                font-size: 0.85em;
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -258,16 +278,6 @@
         
         <div class="back-link">
             <a href="index.html" id="back-link">← Powrót do gier</a>
-        </div>
-        
-        <div class="instructions">
-            <h3 id="how-to-play">Jak grać:</h3>
-            <ul id="instructions-list">
-                <li>Kliknij dwie sąsiednie liczby, które sumują się do 10</li>
-                <li>Lub kliknij dwie identyczne liczby (para)</li>
-                <li>Liczby muszą być obok siebie poziomo lub pionowo</li>
-                <li>Wyczyść wszystkie liczby, aby wygrać!</li>
-            </ul>
         </div>
 
         <div class="stats">
@@ -292,6 +302,16 @@
         <div class="buttons">
             <button class="new-game-btn" onclick="newGame()" id="new-game-btn">Nowa gra</button>
             <button class="add-row-btn" id="add-row-btn" onclick="addRow()">Dodaj rząd (3 pozostało)</button>
+        </div>
+
+        <div class="instructions">
+            <h3 id="how-to-play">Jak grać:</h3>
+            <ul id="instructions-list">
+                <li>Kliknij dwie sąsiednie liczby, które sumują się do 10</li>
+                <li>Lub kliknij dwie identyczne liczby (para)</li>
+                <li>Liczby muszą być obok siebie poziomo lub pionowo</li>
+                <li>Wyczyść wszystkie liczby, aby wygrać!</li>
+            </ul>
         </div>
     </div>
 
@@ -569,7 +589,7 @@
             initGame();
         }
 
-                // Load saved language and START GAME AUTOMATICALLY
+        // Load saved language and START GAME AUTOMATICALLY
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
             currentLang = savedLang;
@@ -582,7 +602,7 @@
                 }
             });
             updateLanguage();
-            initGame(); // AUTO-START THE GAME (changed from nothing)
+            initGame();
         });
     </script>
 </body>
