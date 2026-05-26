@@ -107,6 +107,21 @@
             color: #667eea;
         }
 
+        .next-balls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            min-height: 30px;
+        }
+
+        .preview-ball {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.22), inset 2px 2px 5px rgba(255,255,255,0.45), 0 2px 4px rgba(0,0,0,0.25);
+        }
+
         .message {
             text-align: center;
             padding: 10px;
@@ -205,6 +220,14 @@
             animation: none;
         }
 
+        .ball.clearing {
+            animation: clearBall 0.45s ease forwards;
+        }
+
+        .cell.clearing-cell {
+            animation: clearCellGlow 0.45s ease forwards;
+        }
+
         @keyframes popIn {
             from {
                 transform: scale(0.2);
@@ -213,6 +236,36 @@
             to {
                 transform: scale(1);
                 opacity: 1;
+            }
+        }
+
+        @keyframes clearBall {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                filter: brightness(1);
+            }
+            40% {
+                transform: scale(1.35);
+                opacity: 1;
+                filter: brightness(1.45);
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+                filter: brightness(1.8);
+            }
+        }
+
+        @keyframes clearCellGlow {
+            0% {
+                background: #f8fafc;
+            }
+            45% {
+                background: #bbf7d0;
+            }
+            100% {
+                background: #f8fafc;
             }
         }
 
@@ -326,7 +379,7 @@
             </div>
             <div class="stat">
                 <div class="stat-label" id="next-label">Następne</div>
-                <div class="stat-value" id="next-count">3</div>
+                <div class="next-balls" id="next-balls"></div>
             </div>
         </div>
 
@@ -409,6 +462,7 @@
         let score = 0;
         let gameOver = false;
         let isAnimating = false;
+        let nextBalls = [];
 
         function setLanguage(lang) {
             currentLang = lang;
@@ -442,9 +496,10 @@
             score = 0;
             gameOver = false;
             isAnimating = false;
+            nextBalls = generateNextBalls();
 
             buildBoardOnce();
-            addRandomBalls(INITIAL_BALLS);
+            addRandomBalls(INITIAL_BALLS, generateBallColors(INITIAL_BALLS));
             updateAllCells();
             updateStats();
             showMessage(translations[currentLang].msgStart, 'info');
@@ -626,12 +681,16 @@
             updateCell(targetRow, targetCol);
             clearPathClasses();
 
-            const clearedAfterMove = clearLines();
+            const clearedAfterMove = await clearLines();
+            let clearedAfterNewBalls = 0;
 
             if (!clearedAfterMove) {
-                const addedCells = addRandomBalls(BALLS_PER_TURN);
+                const colorsToAdd = nextBalls;
+                nextBalls = generateNextBalls();
+
+                const addedCells = addRandomBalls(BALLS_PER_TURN, colorsToAdd);
                 addedCells.forEach(cell => updateCell(cell.row, cell.col));
-                clearLines();
+                clearedAfterNewBalls = await clearLines();
             }
 
             updateStats();
@@ -642,8 +701,8 @@
                 return;
             }
 
-            if (clearedAfterMove) {
-                showMessage(t.msgLineCleared + clearedAfterMove, 'success');
+            if (clearedAfterMove || clearedAfterNewBalls) {
+                showMessage(t.msgLineCleared + (clearedAfterMove + clearedAfterNewBalls), 'success');
             } else {
                 showMessage(t.msgStart, 'info');
             }
@@ -702,19 +761,31 @@
             });
         }
 
-        function addRandomBalls(count) {
+        function addRandomBalls(count, colors) {
             const emptyCells = getEmptyCells();
-            const ballsToAdd = Math.min(count, emptyCells.length);
+            const ballsToAdd = Math.min(count, emptyCells.length, colors.length);
             const addedCells = [];
 
             for (let i = 0; i < ballsToAdd; i++) {
                 const randomIndex = Math.floor(Math.random() * emptyCells.length);
                 const cell = emptyCells.splice(randomIndex, 1)[0];
-                board[cell.row][cell.col] = getRandomColor();
+                board[cell.row][cell.col] = colors[i];
                 addedCells.push(cell);
             }
 
             return addedCells;
+        }
+
+        function generateBallColors(count) {
+            const colors = [];
+            for (let i = 0; i < count; i++) {
+                colors.push(getRandomColor());
+            }
+            return colors;
+        }
+
+        function generateNextBalls() {
+            return generateBallColors(BALLS_PER_TURN);
         }
 
         function getRandomColor() {
@@ -735,7 +806,7 @@
             return emptyCells;
         }
 
-        function clearLines() {
+        async function clearLines() {
             const cellsToClear = new Set();
             const directions = [
                 { dr: 0, dc: 1 },
@@ -763,6 +834,8 @@
                 return 0;
             }
 
+            await animateClearingCells(cellsToClear);
+
             cellsToClear.forEach(key => {
                 const [row, col] = key.split(',').map(Number);
                 board[row][col] = null;
@@ -772,6 +845,29 @@
             const points = cellsToClear.size * 10;
             score += points;
             return points;
+        }
+
+        function animateClearingCells(cellsToClear) {
+            return new Promise(resolve => {
+                cellsToClear.forEach(key => {
+                    const [row, col] = key.split(',').map(Number);
+                    const cell = getCellElement(row, col);
+                    if (!cell) return;
+
+                    cell.classList.add('clearing-cell');
+                    const ball = cell.querySelector('.ball');
+                    if (ball) ball.classList.add('clearing');
+                });
+
+                setTimeout(() => {
+                    cellsToClear.forEach(key => {
+                        const [row, col] = key.split(',').map(Number);
+                        const cell = getCellElement(row, col);
+                        if (cell) cell.classList.remove('clearing-cell');
+                    });
+                    resolve();
+                }, 460);
+            });
         }
 
         function getLine(startRow, startCol, dr, dc, color) {
@@ -799,7 +895,18 @@
         function updateStats() {
             document.getElementById('score').textContent = score;
             document.getElementById('balls-count').textContent = `${countBalls()}/${SIZE * SIZE}`;
-            document.getElementById('next-count').textContent = BALLS_PER_TURN;
+            updateNextBallsPreview();
+        }
+
+        function updateNextBallsPreview() {
+            const preview = document.getElementById('next-balls');
+            preview.innerHTML = '';
+
+            nextBalls.forEach(color => {
+                const ball = document.createElement('div');
+                ball.className = `preview-ball ${color}`;
+                preview.appendChild(ball);
+            });
         }
 
         function countBalls() {
