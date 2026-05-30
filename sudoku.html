@@ -25,6 +25,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            user-select: none;
         }
 
         .game-container {
@@ -82,30 +83,6 @@
             font-size: 0.9em;
         }
 
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f0f0f0;
-            border-radius: 10px;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #667eea;
-        }
-
         .difficulty-selector {
             display: flex;
             gap: 10px;
@@ -135,11 +112,35 @@
             color: white;
         }
 
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
         .sudoku-grid {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
             gap: 0;
-            margin: 20px auto;
+            margin: 20px auto 10px;
             width: fit-content;
             border: 3px solid #333;
             background: #333;
@@ -158,6 +159,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .sudoku-cell:nth-child(3n):not(:nth-child(9n)) {
@@ -180,6 +183,11 @@
             background: white;
         }
 
+        .sudoku-cell.has-notes {
+            color: #667eea;
+            background: white;
+        }
+
         .sudoku-cell.selected {
             background: #ffd966;
         }
@@ -195,6 +203,83 @@
         .sudoku-cell:focus {
             outline: 3px solid #667eea;
             outline-offset: -3px;
+        }
+
+        .cell-value {
+            position: relative;
+            z-index: 2;
+        }
+
+        .notes-grid {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            position: absolute;
+            inset: 0;
+            padding: 3px;
+            pointer-events: none;
+        }
+
+        .note {
+            font-size: 0.48em;
+            line-height: 1;
+            color: #4b5563;
+            font-weight: 800;
+            display: flex;
+        }
+
+        .note.corner-0 {
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
+
+        .note.corner-1 {
+            align-items: flex-start;
+            justify-content: flex-end;
+        }
+
+        .note.corner-2 {
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+
+        .note.corner-3 {
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        .mode-row {
+            display: flex;
+            justify-content: center;
+            margin: 0 0 15px;
+        }
+
+        .guess-mode-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .guess-mode-btn:hover {
+            background: #eef2ff;
+            transform: translateY(-2px);
+        }
+
+        .guess-mode-btn.active {
+            background: #fbbf24;
+            border-color: #f59e0b;
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
         }
 
         .number-pad {
@@ -220,6 +305,16 @@
             background: #667eea;
             color: white;
             transform: translateY(-2px);
+        }
+
+        .number-btn.guess-active {
+            border-color: #f59e0b;
+            color: #d97706;
+        }
+
+        .number-btn.guess-active:hover {
+            background: #fbbf24;
+            color: white;
         }
 
         .buttons {
@@ -307,10 +402,18 @@
         }
 
         @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+
             .sudoku-cell {
                 width: 35px;
                 height: 35px;
                 font-size: 1.1em;
+            }
+
+            .note {
+                font-size: 0.45em;
             }
             
             .number-pad {
@@ -320,6 +423,39 @@
             .number-btn {
                 padding: 12px;
                 font-size: 1em;
+            }
+
+            .stats {
+                padding: 12px;
+            }
+
+            .stat-label {
+                font-size: 0.8em;
+            }
+
+            .stat-value {
+                font-size: 1.25em;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .game-container {
+                padding: 15px;
+            }
+
+            .sudoku-cell {
+                width: 32px;
+                height: 32px;
+            }
+
+            .number-btn {
+                padding: 10px;
+            }
+
+            .guess-mode-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 1.25em;
             }
         }
     </style>
@@ -363,6 +499,10 @@
 
         <div class="sudoku-grid" id="sudoku-grid"></div>
 
+        <div class="mode-row">
+            <button class="guess-mode-btn" onclick="toggleGuessMode()" id="guess-mode-btn" title="Guess mode" aria-label="Guess mode">✏️</button>
+        </div>
+
         <div class="number-pad">
             <button class="number-btn" onclick="inputNumber(1)">1</button>
             <button class="number-btn" onclick="inputNumber(2)">2</button>
@@ -400,6 +540,8 @@
                 checkBtn: 'Sprawdź',
                 hintBtn: 'Podpowiedź',
                 clearBoardBtn: 'Wyczyść wszystko',
+                guessModeOn: 'Tryb zgadywania: WŁ',
+                guessModeOff: 'Tryb zgadywania: WYŁ',
                 msgGoodLuck: 'Powodzenia! Wypełnij wszystkie puste komórki.',
                 msgSelectCell: 'Najpierw wybierz komórkę',
                 msgCellCorrect: 'Ta komórka jest już poprawna!',
@@ -408,7 +550,12 @@
                 msgPerfect: '🎉 Perfekcyjnie! Rozwiązałeś!',
                 msgSomeIncorrect: 'Niektóre komórki są niepoprawne. Próbuj dalej!',
                 msgBoardCleared: 'Plansza wyczyszczona!',
-                confirmClear: 'Czy na pewno chcesz wyczyścić wszystkie wpisy?',
+                msgGuessAdded: 'Notatka dodana.',
+                msgGuessRemoved: 'Notatka usunięta.',
+                msgGuessLimit: 'Możesz mieć maksymalnie 4 notatki w jednej komórce.',
+                msgGuessModeOn: 'Tryb zgadywania włączony. Liczby będą dodawane jako notatki w rogach.',
+                msgGuessModeOff: 'Tryb zgadywania wyłączony. Liczby będą wpisywane jako odpowiedź.',
+                confirmClear: 'Czy na pewno chcesz wyczyścić wszystkie wpisy i notatki?',
                 msgWin: '🎉 Gratulacje! Wygrałeś w',
                 msgWinComplete: 'Niesamowite! Ukończyłeś',
                 msgWinPuzzle: 'puzzle!\nCzas:',
@@ -428,6 +575,8 @@
                 checkBtn: 'Check',
                 hintBtn: 'Hint',
                 clearBoardBtn: 'Clear All',
+                guessModeOn: 'Guess mode: ON',
+                guessModeOff: 'Guess mode: OFF',
                 msgGoodLuck: 'Good luck! Fill in all the empty cells.',
                 msgSelectCell: 'Please select a cell first',
                 msgCellCorrect: 'This cell is already correct!',
@@ -436,7 +585,12 @@
                 msgPerfect: '🎉 Perfect! You solved it!',
                 msgSomeIncorrect: 'Some cells are incorrect. Keep trying!',
                 msgBoardCleared: 'Board cleared!',
-                confirmClear: 'Are you sure you want to clear all your entries?',
+                msgGuessAdded: 'Guess added.',
+                msgGuessRemoved: 'Guess removed.',
+                msgGuessLimit: 'You can have at most 4 guesses in one cell.',
+                msgGuessModeOn: 'Guess mode is on. Numbers will be added as corner notes.',
+                msgGuessModeOff: 'Guess mode is off. Numbers will be entered as your answer.',
+                confirmClear: 'Are you sure you want to clear all your entries and guesses?',
                 msgWin: '🎉 Congratulations! You won in',
                 msgWinComplete: 'Amazing! You completed the',
                 msgWinPuzzle: 'puzzle!\nTime:',
@@ -448,10 +602,12 @@
         let board = [];
         let solution = [];
         let fixedCells = [];
+        let notes = [];
         let selectedCell = null;
         let difficulty = 'easy';
         let startTime = null;
         let timerInterval = null;
+        let guessMode = false;
 
         const DIFFICULTIES = {
             easy: 40,
@@ -485,6 +641,7 @@
 
         function updateLanguage() {
             const t = translations[currentLang];
+
             document.getElementById('back-link').textContent = t.backLink;
             document.getElementById('diff-easy').textContent = t.diffEasy;
             document.getElementById('diff-medium').textContent = t.diffMedium;
@@ -499,11 +656,43 @@
             document.getElementById('hint-btn').textContent = t.hintBtn;
             document.getElementById('clear-board-btn').textContent = t.clearBoardBtn;
             document.getElementById('difficulty').textContent = DIFFICULTY_NAMES[difficulty][currentLang];
+
+            updateGuessModeButton();
             document.documentElement.lang = currentLang;
+        }
+
+        function toggleGuessMode() {
+            guessMode = !guessMode;
+            updateGuessModeButton();
+            updateNumberPadMode();
+
+            if (guessMode) {
+                showMessage(translations[currentLang].msgGuessModeOn, 'info');
+            } else {
+                showMessage(translations[currentLang].msgGuessModeOff, 'info');
+            }
+        }
+
+        function updateGuessModeButton() {
+            const btn = document.getElementById('guess-mode-btn');
+            if (!btn) return;
+
+            const t = translations[currentLang];
+            btn.textContent = guessMode ? '📝' : '✏️';
+            btn.title = guessMode ? t.guessModeOn : t.guessModeOff;
+            btn.setAttribute('aria-label', guessMode ? t.guessModeOn : t.guessModeOff);
+            btn.classList.toggle('active', guessMode);
+        }
+
+        function updateNumberPadMode() {
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                btn.classList.toggle('guess-active', guessMode);
+            });
         }
 
         function setDifficulty(level) {
             difficulty = level;
+
             document.querySelectorAll('.difficulty-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
@@ -516,13 +705,21 @@
             newGame();
         }
 
+        function createEmptyNotes() {
+            return Array(9).fill(null).map(() =>
+                Array(9).fill(null).map(() => [])
+            );
+        }
+
         function newGame() {
             solution = generateSolvedBoard();
             board = JSON.parse(JSON.stringify(solution));
             removeNumbers(DIFFICULTIES[difficulty]);
             fixedCells = board.map(row => row.map(value => value !== 0));
+            notes = createEmptyNotes();
             
             selectedCell = null;
+            guessMode = false;
             startTime = Date.now();
             
             if (timerInterval) clearInterval(timerInterval);
@@ -530,6 +727,8 @@
             
             renderBoard();
             updateStats();
+            updateGuessModeButton();
+            updateNumberPadMode();
             showMessage(translations[currentLang].msgGoodLuck, 'info');
         }
 
@@ -553,6 +752,7 @@
                     board[row][col] = 0;
                 }
             }
+
             return false;
         }
 
@@ -562,6 +762,7 @@
                     if (board[i][j] === 0) return [i, j];
                 }
             }
+
             return null;
         }
 
@@ -569,24 +770,30 @@
             for (let i = 0; i < 9; i++) {
                 if (board[row][i] === num) return false;
             }
+
             for (let i = 0; i < 9; i++) {
                 if (board[i][col] === num) return false;
             }
+
             const boxRow = Math.floor(row / 3) * 3;
             const boxCol = Math.floor(col / 3) * 3;
+
             for (let i = 0; i < 3; i++) {
                 for (let j = 0; j < 3; j++) {
                     if (board[boxRow + i][boxCol + j] === num) return false;
                 }
             }
+
             return true;
         }
 
         function removeNumbers(count) {
             let removed = 0;
+
             while (removed < count) {
                 const row = Math.floor(Math.random() * 9);
                 const col = Math.floor(Math.random() * 9);
+
                 if (board[row][col] !== 0) {
                     board[row][col] = 0;
                     removed++;
@@ -605,10 +812,13 @@
                     
                     if (fixedCells[i][j]) {
                         cell.classList.add('fixed');
-                        cell.textContent = board[i][j];
+                        cell.innerHTML = `<span class="cell-value">${board[i][j]}</span>`;
                     } else if (board[i][j] !== 0) {
                         cell.classList.add('user-input');
-                        cell.textContent = board[i][j];
+                        cell.innerHTML = `<span class="cell-value">${board[i][j]}</span>`;
+                    } else if (notes[i][j].length > 0) {
+                        cell.classList.add('has-notes');
+                        cell.innerHTML = createNotesHtml(notes[i][j]);
                     }
                     
                     cell.dataset.row = i;
@@ -621,19 +831,40 @@
                     grid.appendChild(cell);
                 }
             }
+
             highlightCells();
+        }
+
+        function createNotesHtml(cellNotes) {
+            const sortedNotes = [...cellNotes].sort((a, b) => a - b);
+            const corners = ['', '', '', ''];
+
+            sortedNotes.slice(0, 4).forEach((num, index) => {
+                corners[index] = num;
+            });
+
+            return `
+                <div class="notes-grid">
+                    <span class="note corner-0">${corners[0]}</span>
+                    <span class="note corner-1">${corners[1]}</span>
+                    <span class="note corner-2">${corners[2]}</span>
+                    <span class="note corner-3">${corners[3]}</span>
+                </div>
+            `;
         }
 
         function selectCell(row, col) {
             if (fixedCells[row][col]) {
                 return;
             }
+
             selectedCell = { row, col };
             highlightCells();
         }
 
         function highlightCells() {
             const cells = document.querySelectorAll('.sudoku-cell');
+
             cells.forEach(cell => {
                 cell.classList.remove('selected', 'same-number');
             });
@@ -668,12 +899,53 @@
             if (fixedCells[row][col]) {
                 return;
             }
+
+            if (num === 0) {
+                board[row][col] = 0;
+                notes[row][col] = [];
+                renderBoard();
+                updateStats();
+                return;
+            }
+
+            if (guessMode) {
+                toggleNote(row, col, num);
+                return;
+            }
             
             board[row][col] = num;
+            notes[row][col] = [];
             
             renderBoard();
             updateStats();
             checkWin();
+        }
+
+        function toggleNote(row, col, num) {
+            const t = translations[currentLang];
+
+            if (board[row][col] !== 0) {
+                board[row][col] = 0;
+            }
+
+            const cellNotes = notes[row][col];
+            const existingIndex = cellNotes.indexOf(num);
+
+            if (existingIndex !== -1) {
+                cellNotes.splice(existingIndex, 1);
+                showMessage(t.msgGuessRemoved, 'info');
+            } else {
+                if (cellNotes.length >= 4) {
+                    showMessage(t.msgGuessLimit, 'error');
+                    return;
+                }
+
+                cellNotes.push(num);
+                showMessage(t.msgGuessAdded, 'success');
+            }
+
+            renderBoard();
+            updateStats();
         }
 
         function handleKeyPress(e) {
@@ -681,20 +953,29 @@
                 inputNumber(parseInt(e.key));
             } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
                 inputNumber(0);
-            } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || 
-                       e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            } else if (
+                e.key === 'ArrowUp' ||
+                e.key === 'ArrowDown' ||
+                e.key === 'ArrowLeft' ||
+                e.key === 'ArrowRight'
+            ) {
                 e.preventDefault();
                 navigateCell(e.key);
+            } else if (e.key.toLowerCase() === 'g') {
+                toggleGuessMode();
             }
         }
 
         function navigateCell(key) {
             if (!selectedCell) return;
+
             let { row, col } = selectedCell;
+
             if (key === 'ArrowUp' && row > 0) row--;
             if (key === 'ArrowDown' && row < 8) row++;
             if (key === 'ArrowLeft' && col > 0) col--;
             if (key === 'ArrowRight' && col < 8) col++;
+
             selectCell(row, col);
         }
 
@@ -743,7 +1024,9 @@
             }
             
             board[row][col] = solution[row][col];
+            notes[row][col] = [];
             showMessage(`${t.msgHint} ${solution[row][col]}`, 'success');
+
             renderBoard();
             updateStats();
             checkWin();
@@ -751,14 +1034,17 @@
 
         function clearBoard() {
             const t = translations[currentLang];
+
             if (confirm(t.confirmClear)) {
                 for (let i = 0; i < 9; i++) {
                     for (let j = 0; j < 9; j++) {
                         if (!fixedCells[i][j]) {
                             board[i][j] = 0;
+                            notes[i][j] = [];
                         }
                     }
                 }
+
                 renderBoard();
                 updateStats();
                 showMessage(t.msgBoardCleared, 'info');
@@ -778,6 +1064,7 @@
             
             setTimeout(() => {
                 showMessage(`${t.msgWin} ${time}`, 'success');
+
                 if (confirm(`${t.msgWinComplete} ${DIFFICULTY_NAMES[difficulty][currentLang]} ${t.msgWinPuzzle} ${time}${t.msgWinPlayAgain}`)) {
                     newGame();
                 }
@@ -792,6 +1079,7 @@
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
+
             return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
@@ -808,6 +1096,7 @@
                 for (let j = 0; j < 9; j++) {
                     if (!fixedCells[i][j]) {
                         totalEditable++;
+
                         if (board[i][j] !== 0) {
                             filled++;
                         }
@@ -816,6 +1105,7 @@
             }
 
             if (totalEditable === 0) return 100;
+
             return Math.round((filled / totalEditable) * 100);
         }
 
@@ -825,7 +1115,6 @@
             messageEl.className = 'message ' + type;
         }
 
-        // Load saved language and start game automatically
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
             currentLang = savedLang;
