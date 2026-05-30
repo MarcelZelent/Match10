@@ -213,13 +213,17 @@
         .board-actions {
             display: flex;
             justify-content: center;
+            align-items: center;
+            gap: 12px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
 
         .winnable-btn {
-            max-width: 260px;
+            flex: none;
             background: #fbbf24;
             color: white;
+            min-width: 220px;
         }
 
         .winnable-btn:hover {
@@ -233,8 +237,28 @@
             transform: none;
         }
 
+        .winnable-result {
+            font-weight: bold;
+            font-size: 0.95em;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .winnable-result.success {
+            color: #047857;
+        }
+
+        .winnable-result.error {
+            color: #b91c1c;
+        }
+
+        .winnable-result.info {
+            color: #1e40af;
+        }
+
         .buttons {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -258,6 +282,22 @@
         .new-game-btn:hover {
             background: #22c55e;
             transform: translateY(-2px);
+        }
+
+        .undo-btn {
+            background: #fb7185;
+            color: white;
+        }
+
+        .undo-btn:hover {
+            background: #e11d48;
+            transform: translateY(-2px);
+        }
+
+        .undo-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .add-row-btn {
@@ -350,7 +390,16 @@
             }
 
             .buttons {
-                flex-direction: column;
+                grid-template-columns: 1fr;
+            }
+
+            .winnable-btn {
+                width: 100%;
+                min-width: unset;
+            }
+
+            .winnable-result {
+                width: 100%;
             }
         }
 
@@ -413,23 +462,18 @@
 
         <div class="board-actions">
             <button class="winnable-btn" onclick="checkBoardWinnable()" id="winnable-btn">Sprawdź czy da się wygrać</button>
+            <span class="winnable-result info" id="winnable-result"></span>
         </div>
 
         <div class="buttons">
             <button class="new-game-btn" onclick="newGame()" id="new-game-btn">Nowa gra</button>
+            <button class="undo-btn" onclick="undoMove()" id="undo-btn" disabled>↩ Cofnij</button>
             <button class="add-row-btn" id="add-row-btn" onclick="addRow()">Dodaj rząd (3 pozostało)</button>
         </div>
 
         <div class="instructions">
             <h3 id="how-to-play">Jak grać:</h3>
-            <ul id="instructions-list">
-                <li>Kliknij dwie liczby, które sumują się do 10</li>
-                <li>Lub kliknij dwie identyczne liczby</li>
-                <li>Liczby mogą być obok siebie, po linii prostej, po skosie albo przez puste pola</li>
-                <li>Możesz też dopasować przez koniec rzędu do początku niższego rzędu</li>
-                <li>Jeśli cały rząd jest pusty, znika</li>
-                <li>Wyczyść wszystkie liczby, aby wygrać!</li>
-            </ul>
+            <ul id="instructions-list"></ul>
         </div>
     </div>
 
@@ -446,6 +490,8 @@
                     'Możesz też dopasować przez koniec rzędu do początku niższego rzędu',
                     'Dopasowane liczby zostawiają puste pola na swoim miejscu',
                     'Jeśli cały rząd jest pusty, znika, a rzędy poniżej przesuwają się w górę',
+                    'Możesz cofać ruchy bez limitu.',
+                    'Nowa plansza jest generowana tak, aby była możliwa do wyczyszczenia.',
                     'Możesz sprawdzić, czy aktualna plansza nadal da się wyczyścić.',
                     'Wyczyść wszystkie liczby, aby wygrać!'
                 ],
@@ -453,6 +499,7 @@
                 movesLabel: 'Ruchy',
                 rowsLabel: 'Pozostało rzędów',
                 newGameBtn: 'Nowa gra',
+                undoBtn: '↩ Cofnij',
                 addRowBtn: 'Dodaj rząd',
                 winnableBtn: 'Sprawdź czy da się wygrać',
                 left: 'pozostało',
@@ -464,11 +511,13 @@
                 msgPerfect10: 'Perfekcyjna 10! +',
                 msgIncorrect: 'Potrzeba 10 lub pary!',
                 msgWidthChanged: 'Szerokość planszy zmieniona. Nowa gra rozpoczęta.',
-                msgChecking: 'Sprawdzam, czy planszę da się wygrać...',
-                msgWinnable: '✅ Ta plansza jest nadal do wygrania.',
-                msgNotWinnable: '❌ Ta plansza nie da się już wyczyścić bez dodawania rzędów.',
-                msgTooHard: '⚠️ Plansza jest zbyt złożona, żeby szybko to sprawdzić.',
-                msgAlreadyWon: 'Plansza jest już pusta.',
+                msgUndo: 'Cofnięto ostatni ruch.',
+                msgNoUndo: 'Nie ma ruchu do cofnięcia.',
+                msgChecking: 'Sprawdzam...',
+                msgWinnable: '✅ Da się wygrać',
+                msgNotWinnable: '❌ Nie da się wygrać',
+                msgTooHard: '⚠️ Zbyt złożone',
+                msgAlreadyWon: '✅ Już pusta',
                 msgWin: '🎉 Wygrałeś! Wynik:',
                 msgWinMoves: 'w',
                 msgWinMovesText: 'ruchach!',
@@ -489,6 +538,8 @@
                     'You can also match from the end of one row to the start of a lower row',
                     'Matched numbers leave empty spaces in place',
                     'If a whole row is empty, it disappears and rows below move up',
+                    'You can undo moves with no limit.',
+                    'A new board is generated so it is possible to clear.',
                     'You can check if the current board is still possible to clear.',
                     'Clear all numbers to win!'
                 ],
@@ -496,6 +547,7 @@
                 movesLabel: 'Moves',
                 rowsLabel: 'Rows Left',
                 newGameBtn: 'New Game',
+                undoBtn: '↩ Undo',
                 addRowBtn: 'Add Row',
                 winnableBtn: 'Check if winnable',
                 left: 'left',
@@ -507,11 +559,13 @@
                 msgPerfect10: 'Perfect 10! +',
                 msgIncorrect: 'Need 10 or matching pairs!',
                 msgWidthChanged: 'Board width changed. New game started.',
-                msgChecking: 'Checking if the board is winnable...',
-                msgWinnable: '✅ This board is still winnable.',
-                msgNotWinnable: '❌ This board cannot be cleared without adding rows.',
-                msgTooHard: '⚠️ This board is too complex to check quickly.',
-                msgAlreadyWon: 'The board is already empty.',
+                msgUndo: 'Undid the last move.',
+                msgNoUndo: 'There is no move to undo.',
+                msgChecking: 'Checking...',
+                msgWinnable: '✅ Winnable',
+                msgNotWinnable: '❌ Not winnable',
+                msgTooHard: '⚠️ Too complex',
+                msgAlreadyWon: '✅ Already empty',
                 msgWin: '🎉 You Win! Score:',
                 msgWinMoves: 'in',
                 msgWinMovesText: 'moves!',
@@ -530,6 +584,8 @@
         let moves = 0;
         let rowsLeft = 3;
         let COLS = 5;
+        let history = [];
+        let isResolvingMatch = false;
 
         const INITIAL_ROWS = 4;
         const VALID_WIDTHS = [4, 5, 6, 7, 8, 9, 10, 11];
@@ -562,6 +618,7 @@
             document.getElementById('moves-label').textContent = t.movesLabel;
             document.getElementById('rows-label').textContent = t.rowsLabel;
             document.getElementById('new-game-btn').textContent = t.newGameBtn;
+            document.getElementById('undo-btn').textContent = t.undoBtn;
             document.getElementById('winnable-btn').textContent = t.winnableBtn;
             document.getElementById('add-row-btn').textContent = `${t.addRowBtn} (${rowsLeft} ${t.left})`;
             
@@ -586,18 +643,107 @@
         }
 
         function initGame() {
-            grid = [];
             selectedCell = null;
             score = 0;
             moves = 0;
             rowsLeft = 3;
-            
-            for (let i = 0; i < INITIAL_ROWS; i++) {
-                addNewRow();
-            }
+            history = [];
+            isResolvingMatch = false;
+            grid = generateGuaranteedSolvableBoard(INITIAL_ROWS);
             
             updateDisplay();
+            clearWinnableResult();
+            updateUndoButton();
             showMessage(translations[currentLang].msgMatch, 'info');
+        }
+
+        function generateGuaranteedSolvableBoard(rowCount) {
+            const totalCells = rowCount * COLS;
+            const flatNumbers = [];
+
+            for (let i = 0; i < totalCells; i += 2) {
+                const pair = generateCompatiblePair();
+                flatNumbers.push(pair[0], pair[1]);
+            }
+
+            const board = [];
+
+            for (let row = 0; row < rowCount; row++) {
+                const currentRow = [];
+
+                for (let col = 0; col < COLS; col++) {
+                    currentRow.push(flatNumbers[row * COLS + col]);
+                }
+
+                board.push(currentRow);
+            }
+
+            return board;
+        }
+
+        function generateCompatiblePair() {
+            const useSameNumber = Math.random() < 0.35;
+
+            if (useSameNumber) {
+                const value = Math.floor(Math.random() * 9) + 1;
+                return maybeSwap([value, value]);
+            }
+
+            const first = Math.floor(Math.random() * 9) + 1;
+            const second = 10 - first;
+
+            return maybeSwap([first, second]);
+        }
+
+        function maybeSwap(pair) {
+            if (Math.random() < 0.5) {
+                return [pair[1], pair[0]];
+            }
+
+            return pair;
+        }
+
+        function saveHistory() {
+            history.push({
+                grid: cloneBoard(grid),
+                selectedCell: selectedCell ? { ...selectedCell } : null,
+                score,
+                moves,
+                rowsLeft
+            });
+
+            updateUndoButton();
+        }
+
+        function undoMove() {
+            const t = translations[currentLang];
+
+            if (isResolvingMatch) return;
+
+            if (history.length === 0) {
+                showMessage(t.msgNoUndo, 'info');
+                return;
+            }
+
+            const previous = history.pop();
+
+            grid = cloneBoard(previous.grid);
+            selectedCell = previous.selectedCell ? { ...previous.selectedCell } : null;
+            score = previous.score;
+            moves = previous.moves;
+            rowsLeft = previous.rowsLeft;
+
+            updateDisplay();
+            clearWinnableResult();
+            updateUndoButton();
+            showMessage(t.msgUndo, 'info');
+        }
+
+        function updateUndoButton() {
+            const undoBtn = document.getElementById('undo-btn');
+            if (!undoBtn) return;
+
+            undoBtn.disabled = history.length === 0 || isResolvingMatch;
         }
 
         function addNewRow() {
@@ -611,11 +757,14 @@
         }
 
         function addRow() {
-            if (rowsLeft > 0) {
+            if (rowsLeft > 0 && !isResolvingMatch) {
+                saveHistory();
+
                 addNewRow();
                 rowsLeft--;
                 selectedCell = null;
                 updateDisplay();
+                clearWinnableResult();
 
                 const t = translations[currentLang];
                 showMessage(`${t.rowAdded} ${rowsLeft} ${t.rowsRemaining}`, 'info');
@@ -649,6 +798,7 @@
         }
 
         function selectCell(row, col) {
+            if (isResolvingMatch) return;
             if (grid[row][col] === 0) return;
 
             if (!selectedCell) {
@@ -776,11 +926,15 @@
                 return;
             }
 
+            saveHistory();
+
             const sum = cell1.value + cell2.value;
             const isPair = cell1.value === cell2.value;
 
             moves++;
             score += sum;
+            isResolvingMatch = true;
+            updateUndoButton();
             
             const cells = document.querySelectorAll('.cell');
             const index1 = cell1.row * COLS + cell1.col;
@@ -796,7 +950,10 @@
                 selectedCell = null;
 
                 removeEmptyRows();
+                isResolvingMatch = false;
                 updateDisplay();
+                clearWinnableResult();
+                updateUndoButton();
                 checkWin();
             }, 500);
             
@@ -818,6 +975,7 @@
                 const t = translations[currentLang];
 
                 showMessage(`${t.msgWin} ${score} ${t.msgWinMoves} ${moves} ${t.msgWinMovesText}`, 'success');
+                setWinnableResult(t.msgAlreadyWon, 'success');
 
                 setTimeout(() => {
                     if (confirm(`${t.confirmWin} ${score} ${t.confirmWinPts} ${moves} ${t.confirmWinMoves}`)) {
@@ -836,22 +994,25 @@
             const addRowBtn = document.getElementById('add-row-btn');
 
             addRowBtn.textContent = `${t.addRowBtn} (${rowsLeft} ${t.left})`;
-            addRowBtn.disabled = rowsLeft === 0;
+            addRowBtn.disabled = rowsLeft === 0 || isResolvingMatch;
             
             renderGrid();
+            updateUndoButton();
         }
 
         function checkBoardWinnable() {
             const t = translations[currentLang];
             const btn = document.getElementById('winnable-btn');
 
+            if (isResolvingMatch) return;
+
             if (grid.length === 0 || !grid.some(row => row.some(cell => cell !== 0))) {
-                showMessage(t.msgAlreadyWon, 'success');
+                setWinnableResult(t.msgAlreadyWon, 'success');
                 return;
             }
 
             btn.disabled = true;
-            showMessage(t.msgChecking, 'info');
+            setWinnableResult(t.msgChecking, 'info');
 
             setTimeout(() => {
                 const result = isBoardWinnable(grid);
@@ -859,13 +1020,25 @@
                 btn.disabled = false;
 
                 if (result === true) {
-                    showMessage(t.msgWinnable, 'success');
+                    setWinnableResult(t.msgWinnable, 'success');
                 } else if (result === false) {
-                    showMessage(t.msgNotWinnable, 'error');
+                    setWinnableResult(t.msgNotWinnable, 'error');
                 } else {
-                    showMessage(t.msgTooHard, 'info');
+                    setWinnableResult(t.msgTooHard, 'info');
                 }
             }, 30);
+        }
+
+        function setWinnableResult(text, type) {
+            const result = document.getElementById('winnable-result');
+            result.textContent = text;
+            result.className = `winnable-result ${type}`;
+        }
+
+        function clearWinnableResult() {
+            const result = document.getElementById('winnable-result');
+            result.textContent = '';
+            result.className = 'winnable-result info';
         }
 
         function isBoardWinnable(startBoard) {
@@ -881,6 +1054,7 @@
                 }
 
                 statesChecked++;
+
                 if (statesChecked > SOLVER_MAX_STATES) {
                     timedOut = true;
                     return false;
@@ -893,9 +1067,11 @@
                 }
 
                 const key = boardToKey(board);
+
                 if (memo.has(key)) {
                     return false;
                 }
+
                 memo.add(key);
 
                 const pairs = findAllPossiblePairs(board);
