@@ -25,6 +25,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            user-select: none;
         }
 
         .game-container {
@@ -32,7 +33,7 @@
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 500px;
+            max-width: 760px;
             width: 100%;
         }
 
@@ -82,6 +83,53 @@
             font-size: 0.9em;
         }
 
+        .options {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .option-label {
+            font-size: 0.9em;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .width-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .width-btn {
+            flex: none;
+            padding: 7px 11px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 10px;
+            color: #667eea;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .width-btn:hover {
+            background: #eef2ff;
+        }
+
+        .width-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
         .stats {
             display: flex;
             justify-content: space-around;
@@ -108,9 +156,9 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 14px;
+            min-height: 80px;
         }
 
         .cell {
@@ -118,7 +166,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             border-radius: 10px;
-            font-size: 1.5em;
+            font-size: clamp(0.9em, 4vw, 1.5em);
             font-weight: bold;
             color: white;
             cursor: pointer;
@@ -142,6 +190,7 @@
         .cell.empty {
             background: #e0e0e0;
             cursor: default;
+            box-shadow: none;
         }
 
         .cell.matched {
@@ -149,9 +198,39 @@
         }
 
         @keyframes matchAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2) rotate(5deg); background: #4ade80; }
-            100% { transform: scale(0); }
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2) rotate(5deg);
+                background: #4ade80;
+            }
+            100% {
+                transform: scale(0);
+            }
+        }
+
+        .board-actions {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .winnable-btn {
+            max-width: 260px;
+            background: #fbbf24;
+            color: white;
+        }
+
+        .winnable-btn:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .winnable-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .buttons {
@@ -256,13 +335,32 @@
                 font-size: 1.7em;
             }
 
-            .cell {
-                font-size: 1.3em;
+            .grid {
+                gap: 6px;
             }
 
             .instructions {
                 font-size: 0.85em;
                 padding: 12px;
+            }
+
+            .width-btn {
+                padding: 6px 9px;
+                font-size: 0.8em;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .grid {
+                gap: 5px;
+            }
+
+            .cell {
+                border-radius: 7px;
             }
         }
     </style>
@@ -278,6 +376,20 @@
         
         <div class="back-link">
             <a href="index.html" id="back-link">← Powrót do gier</a>
+        </div>
+
+        <div class="options">
+            <span class="option-label" id="grid-width-label">Szerokość:</span>
+            <div class="width-buttons">
+                <button class="width-btn" onclick="setGridWidth(4)" data-width="4">4</button>
+                <button class="width-btn active" onclick="setGridWidth(5)" data-width="5">5</button>
+                <button class="width-btn" onclick="setGridWidth(6)" data-width="6">6</button>
+                <button class="width-btn" onclick="setGridWidth(7)" data-width="7">7</button>
+                <button class="width-btn" onclick="setGridWidth(8)" data-width="8">8</button>
+                <button class="width-btn" onclick="setGridWidth(9)" data-width="9">9</button>
+                <button class="width-btn" onclick="setGridWidth(10)" data-width="10">10</button>
+                <button class="width-btn" onclick="setGridWidth(11)" data-width="11">11</button>
+            </div>
         </div>
 
         <div class="stats">
@@ -299,6 +411,10 @@
 
         <div class="grid" id="grid"></div>
 
+        <div class="board-actions">
+            <button class="winnable-btn" onclick="checkBoardWinnable()" id="winnable-btn">Sprawdź czy da się wygrać</button>
+        </div>
+
         <div class="buttons">
             <button class="new-game-btn" onclick="newGame()" id="new-game-btn">Nowa gra</button>
             <button class="add-row-btn" id="add-row-btn" onclick="addRow()">Dodaj rząd (3 pozostało)</button>
@@ -307,9 +423,11 @@
         <div class="instructions">
             <h3 id="how-to-play">Jak grać:</h3>
             <ul id="instructions-list">
-                <li>Kliknij dwie sąsiednie liczby, które sumują się do 10</li>
-                <li>Lub kliknij dwie identyczne liczby (para)</li>
-                <li>Liczby muszą być obok siebie poziomo lub pionowo</li>
+                <li>Kliknij dwie liczby, które sumują się do 10</li>
+                <li>Lub kliknij dwie identyczne liczby</li>
+                <li>Liczby mogą być obok siebie, po linii prostej, po skosie albo przez puste pola</li>
+                <li>Możesz też dopasować przez koniec rzędu do początku niższego rzędu</li>
+                <li>Jeśli cały rząd jest pusty, znika</li>
                 <li>Wyczyść wszystkie liczby, aby wygrać!</li>
             </ul>
         </div>
@@ -319,11 +437,16 @@
         const translations = {
             pl: {
                 backLink: '← Powrót do gier',
+                gridWidthLabel: 'Szerokość:',
                 howToPlay: 'Jak grać:',
                 instructions: [
-                    'Kliknij dwie sąsiednie liczby, które sumują się do 10',
-                    'Lub kliknij dwie identyczne liczby (para)',
-                    'Liczby muszą być obok siebie poziomo lub pionowo',
+                    'Kliknij dwie liczby, które sumują się do 10',
+                    'Lub kliknij dwie identyczne liczby',
+                    'Liczby mogą być obok siebie, po linii prostej, po skosie albo przez puste pola',
+                    'Możesz też dopasować przez koniec rzędu do początku niższego rzędu',
+                    'Dopasowane liczby zostawiają puste pola na swoim miejscu',
+                    'Jeśli cały rząd jest pusty, znika, a rzędy poniżej przesuwają się w górę',
+                    'Możesz sprawdzić, czy aktualna plansza nadal da się wyczyścić.',
                     'Wyczyść wszystkie liczby, aby wygrać!'
                 ],
                 scoreLabel: 'Wynik',
@@ -331,14 +454,21 @@
                 rowsLabel: 'Pozostało rzędów',
                 newGameBtn: 'Nowa gra',
                 addRowBtn: 'Dodaj rząd',
+                winnableBtn: 'Sprawdź czy da się wygrać',
                 left: 'pozostało',
-                msgMatch: 'Dopasuj liczby, które sumują się do 10!',
-                msgSelect: 'Wybierz sąsiednią komórkę',
+                msgMatch: 'Dopasuj liczby, które sumują się do 10 lub są takie same!',
+                msgSelect: 'Wybierz pasującą liczbę',
                 msgCleared: 'Wybór wyczyszczony',
-                msgAdjacent: 'Komórki muszą być obok siebie!',
+                msgNotConnectable: 'Te liczby nie mogą być połączone.',
                 msgPair: 'Para dopasowana! +',
                 msgPerfect10: 'Perfekcyjna 10! +',
                 msgIncorrect: 'Potrzeba 10 lub pary!',
+                msgWidthChanged: 'Szerokość planszy zmieniona. Nowa gra rozpoczęta.',
+                msgChecking: 'Sprawdzam, czy planszę da się wygrać...',
+                msgWinnable: '✅ Ta plansza jest nadal do wygrania.',
+                msgNotWinnable: '❌ Ta plansza nie da się już wyczyścić bez dodawania rzędów.',
+                msgTooHard: '⚠️ Plansza jest zbyt złożona, żeby szybko to sprawdzić.',
+                msgAlreadyWon: 'Plansza jest już pusta.',
                 msgWin: '🎉 Wygrałeś! Wynik:',
                 msgWinMoves: 'w',
                 msgWinMovesText: 'ruchach!',
@@ -350,11 +480,16 @@
             },
             en: {
                 backLink: '← Back to Games',
+                gridWidthLabel: 'Width:',
                 howToPlay: 'How to Play:',
                 instructions: [
-                    'Click two adjacent numbers that sum to 10',
-                    'Or click two identical numbers (pair)',
-                    'Numbers must be horizontally or vertically adjacent',
+                    'Click two numbers that sum to 10',
+                    'Or click two identical numbers',
+                    'Numbers can match beside each other, in a straight line, diagonally, or through empty spaces',
+                    'You can also match from the end of one row to the start of a lower row',
+                    'Matched numbers leave empty spaces in place',
+                    'If a whole row is empty, it disappears and rows below move up',
+                    'You can check if the current board is still possible to clear.',
                     'Clear all numbers to win!'
                 ],
                 scoreLabel: 'Score',
@@ -362,14 +497,21 @@
                 rowsLabel: 'Rows Left',
                 newGameBtn: 'New Game',
                 addRowBtn: 'Add Row',
+                winnableBtn: 'Check if winnable',
                 left: 'left',
-                msgMatch: 'Match numbers that sum to 10!',
-                msgSelect: 'Select an adjacent cell',
+                msgMatch: 'Match numbers that sum to 10 or are the same!',
+                msgSelect: 'Select a matching number',
                 msgCleared: 'Selection cleared',
-                msgAdjacent: 'Cells must be adjacent!',
+                msgNotConnectable: 'These numbers cannot be connected.',
                 msgPair: 'Pair matched! +',
                 msgPerfect10: 'Perfect 10! +',
                 msgIncorrect: 'Need 10 or matching pairs!',
+                msgWidthChanged: 'Board width changed. New game started.',
+                msgChecking: 'Checking if the board is winnable...',
+                msgWinnable: '✅ This board is still winnable.',
+                msgNotWinnable: '❌ This board cannot be cleared without adding rows.',
+                msgTooHard: '⚠️ This board is too complex to check quickly.',
+                msgAlreadyWon: 'The board is already empty.',
                 msgWin: '🎉 You Win! Score:',
                 msgWinMoves: 'in',
                 msgWinMovesText: 'moves!',
@@ -387,8 +529,12 @@
         let score = 0;
         let moves = 0;
         let rowsLeft = 3;
-        const COLS = 5;
+        let COLS = 5;
+
         const INITIAL_ROWS = 4;
+        const VALID_WIDTHS = [4, 5, 6, 7, 8, 9, 10, 11];
+        const SOLVER_MAX_STATES = 75000;
+        const SOLVER_MAX_TIME_MS = 900;
 
         function setLanguage(lang) {
             currentLang = lang;
@@ -404,7 +550,9 @@
 
         function updateLanguage() {
             const t = translations[currentLang];
+
             document.getElementById('back-link').textContent = t.backLink;
+            document.getElementById('grid-width-label').textContent = t.gridWidthLabel;
             document.getElementById('how-to-play').textContent = t.howToPlay;
             
             const instructionsList = document.getElementById('instructions-list');
@@ -414,9 +562,27 @@
             document.getElementById('moves-label').textContent = t.movesLabel;
             document.getElementById('rows-label').textContent = t.rowsLabel;
             document.getElementById('new-game-btn').textContent = t.newGameBtn;
+            document.getElementById('winnable-btn').textContent = t.winnableBtn;
             document.getElementById('add-row-btn').textContent = `${t.addRowBtn} (${rowsLeft} ${t.left})`;
             
             document.documentElement.lang = currentLang;
+        }
+
+        function setGridWidth(width) {
+            if (!VALID_WIDTHS.includes(width)) return;
+
+            COLS = width;
+            localStorage.setItem('make10GridWidth', String(COLS));
+            updateWidthButtons();
+            initGame();
+            showMessage(translations[currentLang].msgWidthChanged, 'info');
+        }
+
+        function updateWidthButtons() {
+            document.querySelectorAll('.width-btn').forEach(btn => {
+                const width = Number(btn.dataset.width);
+                btn.classList.toggle('active', width === COLS);
+            });
         }
 
         function initGame() {
@@ -436,9 +602,11 @@
 
         function addNewRow() {
             const row = [];
+
             for (let i = 0; i < COLS; i++) {
                 row.push(Math.floor(Math.random() * 9) + 1);
             }
+
             grid.push(row);
         }
 
@@ -446,7 +614,9 @@
             if (rowsLeft > 0) {
                 addNewRow();
                 rowsLeft--;
+                selectedCell = null;
                 updateDisplay();
+
                 const t = translations[currentLang];
                 showMessage(`${t.rowAdded} ${rowsLeft} ${t.rowsRemaining}`, 'info');
             }
@@ -455,7 +625,7 @@
         function renderGrid() {
             const gridElement = document.getElementById('grid');
             gridElement.innerHTML = '';
-            gridElement.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+            gridElement.style.gridTemplateColumns = `repeat(${COLS}, minmax(0, 1fr))`;
             
             for (let row = 0; row < grid.length; row++) {
                 for (let col = 0; col < COLS; col++) {
@@ -485,28 +655,122 @@
                 selectedCell = { row, col, value: grid[row][col] };
                 renderGrid();
                 showMessage(translations[currentLang].msgSelect, 'info');
-            } else {
-                if (selectedCell.row === row && selectedCell.col === col) {
-                    selectedCell = null;
-                    renderGrid();
-                    showMessage(translations[currentLang].msgCleared, 'info');
-                } else {
-                    tryMatch(selectedCell, { row, col, value: grid[row][col] });
-                }
+                return;
             }
+
+            if (selectedCell.row === row && selectedCell.col === col) {
+                selectedCell = null;
+                renderGrid();
+                showMessage(translations[currentLang].msgCleared, 'info');
+                return;
+            }
+
+            tryMatch(selectedCell, { row, col, value: grid[row][col] });
         }
 
-        function areAdjacent(cell1, cell2) {
-            const rowDiff = Math.abs(cell1.row - cell2.row);
-            const colDiff = Math.abs(cell1.col - cell2.col);
-            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+        function areValuesCompatible(cell1, cell2) {
+            const sum = cell1.value + cell2.value;
+            const isPair = cell1.value === cell2.value;
+
+            return sum === 10 || isPair;
+        }
+
+        function canConnect(cell1, cell2, board = grid) {
+            return canConnectStraightOrDiagonal(cell1, cell2, board) || canConnectReadingOrder(cell1, cell2, board);
+        }
+
+        function canConnectStraightOrDiagonal(cell1, cell2, board = grid) {
+            const rowDiff = cell2.row - cell1.row;
+            const colDiff = cell2.col - cell1.col;
+
+            const sameRow = rowDiff === 0;
+            const sameCol = colDiff === 0;
+            const diagonal = Math.abs(rowDiff) === Math.abs(colDiff);
+
+            if (!sameRow && !sameCol && !diagonal) {
+                return false;
+            }
+
+            const rowStep = Math.sign(rowDiff);
+            const colStep = Math.sign(colDiff);
+
+            let row = cell1.row + rowStep;
+            let col = cell1.col + colStep;
+
+            while (row !== cell2.row || col !== cell2.col) {
+                if (!isInsideGrid(row, col, board)) {
+                    return false;
+                }
+
+                if (board[row][col] !== 0) {
+                    return false;
+                }
+
+                row += rowStep;
+                col += colStep;
+            }
+
+            return true;
+        }
+
+        function canConnectReadingOrder(cell1, cell2, board = grid) {
+            const index1 = getFlatIndex(cell1.row, cell1.col);
+            const index2 = getFlatIndex(cell2.row, cell2.col);
+
+            if (index1 === index2) {
+                return false;
+            }
+
+            const start = Math.min(index1, index2) + 1;
+            const end = Math.max(index1, index2);
+
+            for (let index = start; index < end; index++) {
+                const position = getPositionFromFlatIndex(index, board);
+
+                if (!position) {
+                    return false;
+                }
+
+                if (board[position.row][position.col] !== 0) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function getFlatIndex(row, col) {
+            return row * COLS + col;
+        }
+
+        function getPositionFromFlatIndex(index, board = grid) {
+            const row = Math.floor(index / COLS);
+            const col = index % COLS;
+
+            if (!isInsideGrid(row, col, board)) {
+                return null;
+            }
+
+            return { row, col };
+        }
+
+        function isInsideGrid(row, col, board = grid) {
+            return row >= 0 && row < board.length && col >= 0 && col < COLS;
         }
 
         function tryMatch(cell1, cell2) {
             const t = translations[currentLang];
-            
-            if (!areAdjacent(cell1, cell2)) {
-                showMessage(t.msgAdjacent, 'error');
+
+            if (!areValuesCompatible(cell1, cell2)) {
+                const sum = cell1.value + cell2.value;
+                showMessage(`${cell1.value} + ${cell2.value} = ${sum}. ${t.msgIncorrect}`, 'error');
+                selectedCell = null;
+                renderGrid();
+                return;
+            }
+
+            if (!canConnect(cell1, cell2)) {
+                showMessage(t.msgNotConnectable, 'error');
                 selectedCell = null;
                 renderGrid();
                 return;
@@ -515,41 +779,36 @@
             const sum = cell1.value + cell2.value;
             const isPair = cell1.value === cell2.value;
 
-            if (sum === 10 || isPair) {
-                moves++;
-                score += sum;
-                
-                const cells = document.querySelectorAll('.cell');
-                const index1 = cell1.row * COLS + cell1.col;
-                const index2 = cell2.row * COLS + cell2.col;
-                
-                cells[index1].classList.add('matched');
-                cells[index2].classList.add('matched');
-                
-                setTimeout(() => {
-                    grid[cell1.row][cell1.col] = 0;
-                    grid[cell2.row][cell2.col] = 0;
-                    selectedCell = null;
-                    compactGrid();
-                    updateDisplay();
-                    checkWin();
-                }, 500);
-                
-                showMessage(isPair ? `${t.msgPair}${sum}` : `${t.msgPerfect10}${sum}`, 'success');
-            } else {
-                showMessage(`${cell1.value} + ${cell2.value} = ${sum}. ${t.msgIncorrect}`, 'error');
+            moves++;
+            score += sum;
+            
+            const cells = document.querySelectorAll('.cell');
+            const index1 = cell1.row * COLS + cell1.col;
+            const index2 = cell2.row * COLS + cell2.col;
+            
+            if (cells[index1]) cells[index1].classList.add('matched');
+            if (cells[index2]) cells[index2].classList.add('matched');
+            
+            setTimeout(() => {
+                grid[cell1.row][cell1.col] = 0;
+                grid[cell2.row][cell2.col] = 0;
+
                 selectedCell = null;
-                renderGrid();
-            }
+
+                removeEmptyRows();
+                updateDisplay();
+                checkWin();
+            }, 500);
+            
+            showMessage(isPair ? `${t.msgPair}${sum}` : `${t.msgPerfect10}${sum}`, 'success');
         }
 
-        function compactGrid() {
-            for (let row = 0; row < grid.length; row++) {
-                grid[row] = grid[row].filter(cell => cell !== 0);
-                while (grid[row].length < COLS) {
-                    grid[row].push(0);
-                }
-            }
+        function removeEmptyRows() {
+            grid = removeEmptyRowsFromBoard(grid);
+        }
+
+        function removeEmptyRowsFromBoard(board) {
+            return board.filter(row => row.some(cell => cell !== 0));
         }
 
         function checkWin() {
@@ -557,7 +816,9 @@
             
             if (!hasNumbers) {
                 const t = translations[currentLang];
+
                 showMessage(`${t.msgWin} ${score} ${t.msgWinMoves} ${moves} ${t.msgWinMovesText}`, 'success');
+
                 setTimeout(() => {
                     if (confirm(`${t.confirmWin} ${score} ${t.confirmWinPts} ${moves} ${t.confirmWinMoves}`)) {
                         newGame();
@@ -573,10 +834,146 @@
             
             const t = translations[currentLang];
             const addRowBtn = document.getElementById('add-row-btn');
+
             addRowBtn.textContent = `${t.addRowBtn} (${rowsLeft} ${t.left})`;
             addRowBtn.disabled = rowsLeft === 0;
             
             renderGrid();
+        }
+
+        function checkBoardWinnable() {
+            const t = translations[currentLang];
+            const btn = document.getElementById('winnable-btn');
+
+            if (grid.length === 0 || !grid.some(row => row.some(cell => cell !== 0))) {
+                showMessage(t.msgAlreadyWon, 'success');
+                return;
+            }
+
+            btn.disabled = true;
+            showMessage(t.msgChecking, 'info');
+
+            setTimeout(() => {
+                const result = isBoardWinnable(grid);
+
+                btn.disabled = false;
+
+                if (result === true) {
+                    showMessage(t.msgWinnable, 'success');
+                } else if (result === false) {
+                    showMessage(t.msgNotWinnable, 'error');
+                } else {
+                    showMessage(t.msgTooHard, 'info');
+                }
+            }, 30);
+        }
+
+        function isBoardWinnable(startBoard) {
+            const memo = new Set();
+            const startTime = performance.now();
+            let statesChecked = 0;
+            let timedOut = false;
+
+            function dfs(board) {
+                if (performance.now() - startTime > SOLVER_MAX_TIME_MS) {
+                    timedOut = true;
+                    return false;
+                }
+
+                statesChecked++;
+                if (statesChecked > SOLVER_MAX_STATES) {
+                    timedOut = true;
+                    return false;
+                }
+
+                board = removeEmptyRowsFromBoard(board);
+
+                if (board.length === 0 || !board.some(row => row.some(cell => cell !== 0))) {
+                    return true;
+                }
+
+                const key = boardToKey(board);
+                if (memo.has(key)) {
+                    return false;
+                }
+                memo.add(key);
+
+                const pairs = findAllPossiblePairs(board);
+
+                if (pairs.length === 0) {
+                    return false;
+                }
+
+                pairs.sort((a, b) => {
+                    const boardA = applyPairToBoard(board, a);
+                    const boardB = applyPairToBoard(board, b);
+                    return boardA.length - boardB.length;
+                });
+
+                for (const pair of pairs) {
+                    const nextBoard = applyPairToBoard(board, pair);
+
+                    if (dfs(nextBoard)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            const solved = dfs(cloneBoard(startBoard));
+
+            if (solved) return true;
+            if (timedOut) return null;
+            return false;
+        }
+
+        function boardToKey(board) {
+            return board.map(row => row.join(',')).join('|');
+        }
+
+        function cloneBoard(board) {
+            return board.map(row => [...row]);
+        }
+
+        function findAllPossiblePairs(board) {
+            const numbers = [];
+
+            for (let row = 0; row < board.length; row++) {
+                for (let col = 0; col < COLS; col++) {
+                    if (board[row][col] !== 0) {
+                        numbers.push({
+                            row,
+                            col,
+                            value: board[row][col]
+                        });
+                    }
+                }
+            }
+
+            const pairs = [];
+
+            for (let i = 0; i < numbers.length; i++) {
+                for (let j = i + 1; j < numbers.length; j++) {
+                    const cell1 = numbers[i];
+                    const cell2 = numbers[j];
+
+                    if (areValuesCompatible(cell1, cell2) && canConnect(cell1, cell2, board)) {
+                        pairs.push({ cell1, cell2 });
+                    }
+                }
+            }
+
+            return pairs;
+        }
+
+        function applyPairToBoard(board, pair) {
+            const nextBoard = cloneBoard(board);
+
+            nextBoard[pair.cell1.row][pair.cell1.col] = 0;
+            nextBoard[pair.cell2.row][pair.cell2.col] = 0;
+
+            return removeEmptyRowsFromBoard(nextBoard);
         }
 
         function showMessage(text, type) {
@@ -589,10 +986,16 @@
             initGame();
         }
 
-        // Load saved language and START GAME AUTOMATICALLY
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
+            const savedWidth = Number(localStorage.getItem('make10GridWidth'));
+
+            if (VALID_WIDTHS.includes(savedWidth)) {
+                COLS = savedWidth;
+            }
+
             setLanguage(savedLang);
+            updateWidthButtons();
             initGame();
         });
     </script>
