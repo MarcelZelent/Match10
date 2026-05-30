@@ -25,6 +25,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            user-select: none;
         }
 
         .game-container {
@@ -82,6 +83,60 @@
             font-size: 0.9em;
         }
 
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        .option-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .option-label {
+            font-size: 0.9em;
+            color: #555;
+            font-weight: bold;
+            min-width: 95px;
+            text-align: right;
+        }
+
+        .option-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .option-btn {
+            flex: none;
+            padding: 7px 12px;
+            border: 2px solid #667eea;
+            background: white;
+            border-radius: 10px;
+            color: #667eea;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover {
+            background: #eef2ff;
+        }
+
+        .option-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
         .stats {
             display: flex;
             justify-content: space-around;
@@ -111,15 +166,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 5px;
-            min-height: 30px;
-        }
-
-        .preview-ball {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.22), inset 2px 2px 5px rgba(255,255,255,0.45), 0 2px 4px rgba(0,0,0,0.25);
+            gap: 6px;
+            min-height: 32px;
+            flex-wrap: wrap;
+            max-width: 120px;
         }
 
         .message {
@@ -174,6 +224,7 @@
             align-items: center;
             transition: background 0.15s ease, transform 0.15s ease;
             position: relative;
+            overflow: hidden;
         }
 
         .cell:hover {
@@ -183,6 +234,7 @@
         .cell.selected {
             background: #ffd966;
             transform: scale(1.04);
+            box-shadow: inset 0 0 0 3px #f59e0b;
         }
 
         .cell.path {
@@ -203,13 +255,27 @@
             background: #93c5fd;
         }
 
-        .ball {
-            width: 72%;
-            height: 72%;
+        .ball,
+        .preview-ball {
             border-radius: 50%;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.22), inset 4px 4px 8px rgba(255,255,255,0.45), 0 3px 7px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 7px rgba(0,0,0,0.28);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,0.35);
+        }
+
+        .ball {
+            width: 76%;
+            height: 76%;
             animation: popIn 0.22s ease;
             z-index: 2;
+        }
+
+        .preview-ball {
+            width: 25px;
+            height: 25px;
         }
 
         .ball.moving {
@@ -226,6 +292,34 @@
 
         .cell.clearing-cell {
             animation: clearCellGlow 0.45s ease forwards;
+        }
+
+        .red {
+            background: #dc0000;
+        }
+
+        .blue {
+            background: #2563eb;
+        }
+
+        .green {
+            background: #16a34a;
+        }
+
+        .yellow {
+            background: #facc15;
+        }
+
+        .purple {
+            background: #9333ea;
+        }
+
+        .orange {
+            background: #f97316;
+        }
+
+        .cyan {
+            background: #0891b2;
         }
 
         @keyframes popIn {
@@ -245,37 +339,37 @@
                 opacity: 1;
                 filter: brightness(1);
             }
-            40% {
+            35% {
                 transform: scale(1.35);
                 opacity: 1;
+                filter: brightness(1.25);
+            }
+            70% {
+                transform: scale(1.05) rotate(8deg);
+                opacity: 0.95;
                 filter: brightness(1.45);
             }
             100% {
                 transform: scale(0);
                 opacity: 0;
-                filter: brightness(1.8);
+                filter: brightness(1.7);
             }
         }
 
         @keyframes clearCellGlow {
             0% {
                 background: #f8fafc;
+                box-shadow: none;
             }
             45% {
                 background: #bbf7d0;
+                box-shadow: inset 0 0 0 3px #22c55e;
             }
             100% {
                 background: #f8fafc;
+                box-shadow: none;
             }
         }
-
-        .red { background: #ef4444; }
-        .blue { background: #3b82f6; }
-        .green { background: #22c55e; }
-        .yellow { background: #facc15; }
-        .purple { background: #a855f7; }
-        .orange { background: #fb923c; }
-        .pink { background: #ec4899; }
 
         .buttons {
             display: flex;
@@ -328,6 +422,10 @@
         }
 
         @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
             .game-container {
                 padding: 20px;
             }
@@ -352,6 +450,36 @@
             .stat-value {
                 font-size: 1.25em;
             }
+
+            .preview-ball {
+                width: 23px;
+                height: 23px;
+            }
+
+            .option-label {
+                min-width: auto;
+                text-align: center;
+            }
+
+            .option-btn {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .game-container {
+                padding: 15px;
+            }
+
+            .board {
+                gap: 2px;
+                padding: 2px;
+            }
+
+            .next-balls {
+                max-width: 95px;
+            }
         }
     </style>
 </head>
@@ -366,6 +494,29 @@
 
         <div class="back-link">
             <a href="index.html" id="back-link">← Powrót do gier</a>
+        </div>
+
+        <div class="options">
+            <div class="option-row">
+                <span class="option-label" id="colors-option-label">Kolory:</span>
+                <div class="option-buttons">
+                    <button class="option-btn color-count-btn" onclick="setColorCount(4)" data-color-count="4">4</button>
+                    <button class="option-btn color-count-btn" onclick="setColorCount(5)" data-color-count="5">5</button>
+                    <button class="option-btn color-count-btn" onclick="setColorCount(6)" data-color-count="6">6</button>
+                    <button class="option-btn color-count-btn active" onclick="setColorCount(7)" data-color-count="7">7</button>
+                </div>
+            </div>
+
+            <div class="option-row">
+                <span class="option-label" id="new-balls-option-label">Nowe kulki:</span>
+                <div class="option-buttons">
+                    <button class="option-btn new-balls-btn" onclick="setNewBallsPerTurn(1)" data-new-balls="1">1</button>
+                    <button class="option-btn new-balls-btn" onclick="setNewBallsPerTurn(2)" data-new-balls="2">2</button>
+                    <button class="option-btn new-balls-btn active" onclick="setNewBallsPerTurn(3)" data-new-balls="3">3</button>
+                    <button class="option-btn new-balls-btn" onclick="setNewBallsPerTurn(4)" data-new-balls="4">4</button>
+                    <button class="option-btn new-balls-btn" onclick="setNewBallsPerTurn(5)" data-new-balls="5">5</button>
+                </div>
+            </div>
         </div>
 
         <div class="stats">
@@ -402,6 +553,8 @@
             pl: {
                 title: '🔴 Color Lines',
                 backLink: '← Powrót do gier',
+                colorsOptionLabel: 'Kolory:',
+                newBallsOptionLabel: 'Nowe kulki:',
                 scoreLabel: 'Wynik',
                 ballsLabel: 'Kulki',
                 nextLabel: 'Następne',
@@ -410,9 +563,10 @@
                 instructions: [
                     'Kliknij kulkę, aby ją wybrać.',
                     'Kliknij puste pole, aby przesunąć kulkę. Musi istnieć wolna ścieżka.',
-                    'Po każdym ruchu pojawiają się 3 nowe kulki.',
+                    'Po każdym ruchu pojawiają się nowe kulki.',
                     'Ułóż 5 kulek tego samego koloru w linii: poziomo, pionowo lub po skosie.',
-                    'Linia znika i dostajesz punkty.'
+                    'Linia znika i dostajesz punkty.',
+                    'Możesz zmienić liczbę kolorów i liczbę nowych kulek po ruchu.'
                 ],
                 msgStart: 'Wybierz kulkę i przesuń ją na puste pole.',
                 msgSelectBall: 'Kulka wybrana. Wybierz dostępne puste pole.',
@@ -426,6 +580,8 @@
             en: {
                 title: '🔴 Color Lines',
                 backLink: '← Back to Games',
+                colorsOptionLabel: 'Colors:',
+                newBallsOptionLabel: 'New balls:',
                 scoreLabel: 'Score',
                 ballsLabel: 'Balls',
                 nextLabel: 'Next',
@@ -434,9 +590,10 @@
                 instructions: [
                     'Click a ball to select it.',
                     'Click an empty square to move the ball. There must be a free path.',
-                    'After every move, 3 new balls appear.',
+                    'After every move, new balls appear.',
                     'Make a line of 5 balls of the same color: horizontal, vertical, or diagonal.',
-                    'The line disappears and you get points.'
+                    'The line disappears and you get points.',
+                    'You can change the number of colors and the number of new balls after each move.'
                 ],
                 msgStart: 'Choose a ball and move it to an empty square.',
                 msgSelectBall: 'Ball selected. Choose a reachable empty square.',
@@ -451,11 +608,13 @@
 
         const SIZE = 9;
         const INITIAL_BALLS = 5;
-        const BALLS_PER_TURN = 3;
         const LINE_LENGTH = 5;
         const MOVE_STEP_MS = 55;
-        const COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink'];
 
+        const ALL_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'cyan'];
+
+        let colorCount = 7;
+        let newBallsPerTurn = 3;
         let currentLang = 'pl';
         let board = [];
         let selectedCell = null;
@@ -480,6 +639,8 @@
 
             document.getElementById('title').textContent = t.title;
             document.getElementById('back-link').textContent = t.backLink;
+            document.getElementById('colors-option-label').textContent = t.colorsOptionLabel;
+            document.getElementById('new-balls-option-label').textContent = t.newBallsOptionLabel;
             document.getElementById('score-label').textContent = t.scoreLabel;
             document.getElementById('balls-label').textContent = t.ballsLabel;
             document.getElementById('next-label').textContent = t.nextLabel;
@@ -488,6 +649,42 @@
             document.getElementById('instructions-list').innerHTML = t.instructions.map(item => `<li>${item}</li>`).join('');
 
             document.documentElement.lang = currentLang;
+        }
+
+        function getActiveColors() {
+            return ALL_COLORS.slice(0, colorCount);
+        }
+
+        function setColorCount(count) {
+            if (isAnimating) return;
+
+            colorCount = count;
+            localStorage.setItem('colorCount', String(colorCount));
+            updateColorCountButtons();
+            newGame();
+        }
+
+        function setNewBallsPerTurn(count) {
+            if (isAnimating) return;
+
+            newBallsPerTurn = count;
+            localStorage.setItem('newBallsPerTurn', String(newBallsPerTurn));
+            updateNewBallsButtons();
+            newGame();
+        }
+
+        function updateColorCountButtons() {
+            document.querySelectorAll('.color-count-btn').forEach(btn => {
+                const count = Number(btn.dataset.colorCount);
+                btn.classList.toggle('active', count === colorCount);
+            });
+        }
+
+        function updateNewBallsButtons() {
+            document.querySelectorAll('.new-balls-btn').forEach(btn => {
+                const count = Number(btn.dataset.newBalls);
+                btn.classList.toggle('active', count === newBallsPerTurn);
+            });
         }
 
         function newGame() {
@@ -545,6 +742,7 @@
             if (color) {
                 const ball = document.createElement('div');
                 ball.className = `ball ${color}`;
+                ball.setAttribute('aria-label', color);
                 cell.appendChild(ball);
             }
         }
@@ -688,7 +886,7 @@
                 const colorsToAdd = nextBalls;
                 nextBalls = generateNextBalls();
 
-                const addedCells = addRandomBalls(BALLS_PER_TURN, colorsToAdd);
+                const addedCells = addRandomBalls(newBallsPerTurn, colorsToAdd);
                 addedCells.forEach(cell => updateCell(cell.row, cell.col));
                 clearedAfterNewBalls = await clearLines();
             }
@@ -722,7 +920,7 @@
                 }
 
                 const firstRect = firstCell.getBoundingClientRect();
-                const ballSize = firstRect.width * 0.72;
+                const ballSize = firstRect.width * 0.76;
                 const movingBall = document.createElement('div');
                 movingBall.className = `ball ${color} moving`;
                 movingBall.style.width = `${ballSize}px`;
@@ -785,11 +983,12 @@
         }
 
         function generateNextBalls() {
-            return generateBallColors(BALLS_PER_TURN);
+            return generateBallColors(newBallsPerTurn);
         }
 
         function getRandomColor() {
-            return COLORS[Math.floor(Math.random() * COLORS.length)];
+            const colors = getActiveColors();
+            return colors[Math.floor(Math.random() * colors.length)];
         }
 
         function getEmptyCells() {
@@ -905,6 +1104,7 @@
             nextBalls.forEach(color => {
                 const ball = document.createElement('div');
                 ball.className = `preview-ball ${color}`;
+                ball.setAttribute('aria-label', color);
                 preview.appendChild(ball);
             });
         }
@@ -941,7 +1141,20 @@
 
         window.addEventListener('load', () => {
             const savedLang = localStorage.getItem('language') || 'pl';
+            const savedColorCount = Number(localStorage.getItem('colorCount'));
+            const savedNewBallsPerTurn = Number(localStorage.getItem('newBallsPerTurn'));
+
+            if ([4, 5, 6, 7].includes(savedColorCount)) {
+                colorCount = savedColorCount;
+            }
+
+            if ([1, 2, 3, 4, 5].includes(savedNewBallsPerTurn)) {
+                newBallsPerTurn = savedNewBallsPerTurn;
+            }
+
             setLanguage(savedLang);
+            updateColorCountButtons();
+            updateNewBallsButtons();
             newGame();
         });
     </script>
